@@ -303,8 +303,5 @@ us_base + geom_polygon(data = by_year_region_sex_09_formap, aes(fill = CI_per_hu
 
 ##Conclusions
 
-##Appendix
-```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
 
-```
 
