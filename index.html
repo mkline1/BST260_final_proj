@@ -9,6 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Maddy Kline" />
 
 
 <title>Welcome to my website!</title>
@@ -256,11 +257,280 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">Welcome to my website!</h1>
+<h4 class="author">Maddy Kline</h4>
 
 </div>
 
 
-<p>You’re up and running!</p>
+<p>##Introduction</p>
+<p>text</p>
+<p>##Results
+<img src="index_files/figure-html/unnamed-chunk-1-1.png" width="672" /><img src="index_files/figure-html/unnamed-chunk-1-2.png" width="672" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" width="960" />
+<img src="index_files/figure-html/unnamed-chunk-3-1.png" width="960" />
+<img src="index_files/figure-html/unnamed-chunk-4-1.png" width="672" />
+<img src="index_files/figure-html/unnamed-chunk-5-1.png" width="960" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" width="960" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" width="1920" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" width="960" />
+<img src="index_files/figure-html/unnamed-chunk-9-1.png" width="960" />
+<img src="index_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" width="960" />
+<img src="index_files/figure-html/unnamed-chunk-12-1.png" width="960" />
+<img src="index_files/figure-html/unnamed-chunk-13-1.png" width="1920" />
+<img src="index_files/figure-html/unnamed-chunk-14-1.png" width="1920" /></p>
+<p>##Conclusions</p>
+<p>##Appendix</p>
+<pre class="r"><code>knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(usmap)
+library(gridExtra)
+library(maps)
+library(mapdata)
+library(ggmap)
+
+#Read in data on cases
+dat &lt;- read_csv(&quot;/Users/madeleinekline/Dropbox (Harvard University)/G1/GradLab/StrepPharyngitis/output/GeoVisits.csv&quot;)
+
+#Read in data on membership
+coh &lt;- read_csv(&quot;/Users/madeleinekline/Dropbox (Harvard University)/G1/GradLab/StrepPharyngitis/output/GeoCohort.csv&quot;)
+#this dataframe has population by sex, age group, and state but not by month. So need to add it to the other dataframe once already collapsed by year. 
+
+#get data by year, rather than by month:
+by_year &lt;- aggregate(NVISITS ~ YEAR + STATE + SEX + AGEGRP + PRIMARYCOND, dat, sum)
+#we can then join this with the population data from cohort
+by_year &lt;- left_join(by_year, coh)
+
+by_year |&gt; group_by(YEAR) |&gt; summarize(total_vis = sum(NVISITS), total_memb = sum(NMEMB), CI = total_vis/total_memb) |&gt; ggplot(aes(x=YEAR, y = total_vis)) + geom_bar(stat = &quot;identity&quot;, fill = &quot;steelblue&quot;) + theme_bw() + geom_text(aes(label=total_vis), vjust=1.6, color=&quot;white&quot;, size=3.5) + ggtitle(&quot;Total Strep Pharyngitis Visits by Year US&quot;)
+
+by_year |&gt; group_by(YEAR) |&gt; summarize(total_vis = sum(NVISITS), total_memb = sum(NMEMB), CI = round(total_vis/total_memb,4)) |&gt; ggplot(aes(x=YEAR, y = CI)) + geom_bar(stat = &quot;identity&quot;, fill = &quot;steelblue&quot;) + theme_bw() + geom_text(aes(label=CI), vjust=1.6, color=&quot;white&quot;, size=2.0) + ggtitle(&quot;Total Strep Pharyngitis Visits per Member by Year US&quot;)
+
+summar &lt;- by_year |&gt; group_by(YEAR) |&gt; summarize(total_vis = sum(NVISITS), total_memb = sum(NMEMB), CI = total_vis/total_memb) 
+sum(summar$total_vis) #total of 6,949,847 visits in those 9 years
+sum(summar$total_memb) #total of 240,231,310 members; but not unique individuals
+#we now load in US mapping data from the maps package
+us_df &lt;- map_data(&quot;state&quot;)
+
+#this creates a base US map to build upon
+us_base &lt;- ggplot(data = us_df, mapping = aes(x = long, y = lat, group =group))+
+  coord_fixed(1.3) + geom_polygon(color=&quot;black&quot;, fill = &quot;gray&quot;)
+
+#let&#39;s summarize cumulative incidence by state across years to start
+by_state &lt;- by_year |&gt;
+  group_by(YEAR, STATE) |&gt;
+  summarize(visits = sum(NVISITS), members = sum(NMEMB), CI = visits/members)
+
+#we now manipulate the data slightly to show CI per hundred, and make the state names match the mapping dataframe
+strep_all &lt;- by_state |&gt; mutate(region = tolower(STATE), CI_per_hundred = CI*100) |&gt;
+  select(region, CI_per_hundred)
+#we join our dataframe with strep info with our mapping dataframe
+us_strep_all &lt;- inner_join(us_df, strep_all, by = &quot;region&quot;)
+us_strep_rates_over_time &lt;- us_base + geom_polygon(data = us_strep_all, aes(fill = CI_per_hundred))+
+  geom_polygon(color = &quot;gray&quot;, fill = NA) + theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + facet_wrap(~YEAR) + scale_fill_gradient(trans = &quot;log10&quot;) + ggtitle(&quot;Cumulative Incidence of Streptococcal Pharyngitis from 2010-2018 \n All Ages&quot;)
+us_strep_rates_over_time
+
+#now we add region designations for &quot;northeast&quot;, &quot;south&quot;, &quot;midwest&quot;, and &quot;west&quot;
+#add regions to this dataframe
+#make a function that converts lists of state abbreviations to lists of state names
+to_statename &lt;- function(list){
+  new_list &lt;- c()
+  for(i in 1:length(list)){
+    name &lt;- state.name[grep(list[i], state.abb)] 
+    new_list &lt;- append(new_list, name)
+  }
+  new_list
+}
+
+northeast_states &lt;- tolower(to_statename(.northeast_region))
+midwest_states &lt;- tolower(to_statename(.midwest_region))
+south_states &lt;- tolower(to_statename(.south_region))
+west_states &lt;- tolower(to_statename(.west_region))
+
+northeast_df &lt;- data.frame(region = northeast_states, part = &quot;northeast&quot;) 
+midwest_df &lt;- data.frame(region = midwest_states, part = &quot;midwest&quot;)   
+south_df &lt;- data.frame(region = south_states, part = &quot;south&quot;) 
+west_df &lt;- data.frame(region = west_states, part = &quot;west&quot;)
+#will put dc in the south because maryland and viriginia are
+dc_df &lt;- data.frame(region = &quot;washington dc&quot;, part = &quot;south&quot;)
+
+
+state_parts &lt;- rbind(northeast_df, midwest_df, south_df, west_df, dc_df)
+
+strep_all_region &lt;- left_join(strep_all, state_parts, by = &quot;region&quot;)
+
+states_indiv_region &lt;- strep_all_region |&gt; group_by(YEAR, region) |&gt; ggplot(aes(YEAR, CI_per_hundred, group=region)) + geom_line(aes(col = part)) + ggtitle(&quot;Streptococcal Pharyngitis In All States by Region&quot;) + theme_bw()
+
+#now group them by region and just report 1 value per region
+state_parts_2 &lt;- state_parts
+names(state_parts_2)[1] &lt;- &quot;state&quot;
+by_state_2 &lt;- by_state |&gt; mutate(state = tolower(STATE))
+strep_region_visits &lt;- left_join(by_state_2, state_parts_2, by = &quot;state&quot;)
+strep_region_visits_agg &lt;- aggregate(visits~ part + YEAR, dat = strep_region_visits, sum)
+strep_region_members_agg &lt;- aggregate(members~ part + YEAR, dat = strep_region_visits, sum)
+strep_region_joined &lt;- left_join(strep_region_visits_agg, strep_region_members_agg)
+strep_region_joined &lt;- strep_region_joined |&gt; mutate(CI_per_hundred = visits/members * 100)
+
+per_region&lt;- strep_region_joined |&gt; group_by(YEAR, part) |&gt; ggplot(aes(YEAR, CI_per_hundred, group=part)) + geom_line(aes(col = part)) + ggtitle(&quot;Streptococcal Pharyngitis By Region&quot;) + theme_bw()
+
+grid.arrange(states_indiv_region, per_region, ncol=2)
+
+#now we look at the data by age group across all regions
+by_year &lt;- by_year |&gt; mutate(&quot;state&quot; = STATE)
+by_year_age_visits &lt;- aggregate(NVISITS ~ YEAR + state + AGEGRP + PRIMARYCOND, dat = by_year, sum)
+by_year_age_membs &lt;- aggregate(NMEMB ~ YEAR + state + AGEGRP + PRIMARYCOND, dat = by_year, sum)
+by_year_age &lt;- left_join(by_year_age_visits, by_year_age_membs)
+by_year_age &lt;- by_year_age |&gt; mutate(CI_per_hundred = NVISITS/NMEMB *100, state = tolower(state))
+#add in region just in case?
+by_year_age &lt;- left_join(by_year_age, state_parts_2)
+#make a plot of trends over time by state
+
+
+country_by_age &lt;- left_join(aggregate(NVISITS ~ AGEGRP + YEAR, dat = by_year_age, sum), aggregate(NMEMB ~ AGEGRP + YEAR, dat = by_year_age, sum))
+country_by_age &lt;- country_by_age |&gt; mutate(CI_per_hundred = NVISITS/NMEMB * 100)
+
+country_by_age |&gt; ggplot(aes(YEAR, CI_per_hundred, group = AGEGRP)) + geom_line(aes(color = AGEGRP)) + ggtitle(&quot;Streptococcal Pharyngitis in the US from 2010-2018 \n By Age Group&quot;) + theme_bw()
+
+by_year_age |&gt; ggplot(aes(YEAR, CI_per_hundred, group = AGEGRP)) + geom_line(aes(color=AGEGRP)) + facet_wrap(~state) + theme(axis.text.x = element_text(angle=90, hjust=1)) + ggtitle(&quot;Streptococcal Pharyngitis in the US from 2010-2018 \n By State and Age Group&quot;) + theme_bw()
+#just look at 0-4, 5-9, 10-10 age groups
+by_year_age |&gt; 
+  filter(AGEGRP %in% c(&quot;00_04&quot;, &quot;05_09&quot;, &quot;10_19&quot;)) |&gt;
+  ggplot(aes(YEAR, CI_per_hundred, group = AGEGRP)) + geom_line(aes(color=AGEGRP)) + facet_wrap(~state) + theme(axis.text.x = element_text(angle=90, hjust=1)) + ggtitle(&quot;Streptococcal Pharyngitis in the US from 2010-2018 \n By State and Younger Age Groups&quot;) + theme_bw()
+#making maps for age group trends over time
+by_year_age_formap &lt;- by_year_age
+names(by_year_age_formap)[2] = &quot;region&quot;
+us_strep_byage_map &lt;- inner_join(us_df, by_year_age_formap, by = &quot;region&quot;)
+#attempt facet_grid with year as the column and age group as the row
+us_strep_byage_map_gg &lt;- us_base + 
+  geom_polygon(data = us_strep_byage_map, aes(fill = CI_per_hundred)) +
+    geom_polygon(color = &quot;gray&quot;, fill = NA) + 
+  theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + scale_fill_gradient(trans = &quot;log10&quot;) + ggtitle(&quot;Cumulative Incidence of Streptococcal Pharyngitis from 2010-2018 \n By Age Group&quot;)
+
+us_strep_byage_map_gg + facet_grid(rows = vars(AGEGRP), cols = vars(YEAR) )
+#just youngest age group first
+us_strep_byage_map_04 &lt;- us_strep_byage_map |&gt; 
+  filter(AGEGRP == &quot;00_04&quot;)
+us_strep_byage_map_gg04 &lt;- us_base + geom_polygon(data = us_strep_byage_map_04, aes(fill = CI_per_hundred))+
+  geom_polygon(color = &quot;gray&quot;, fill = NA) + theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + facet_wrap(~YEAR) + scale_fill_gradient(trans = &quot;log10&quot;) + ggtitle(&quot;Cumulative Incidence of Streptococcal Pharyngitis from 2010-2018 \n 0-4 Age Group&quot;)
+us_strep_byage_map_gg04
+us_strep_byage_map_09 &lt;- us_strep_byage_map |&gt; 
+  filter(AGEGRP == &quot;05_09&quot;)
+us_strep_byage_map_gg09 &lt;- us_base + geom_polygon(data = us_strep_byage_map_09, aes(fill = CI_per_hundred))+
+  geom_polygon(color = &quot;gray&quot;, fill = NA) + theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + facet_wrap(~YEAR) + scale_fill_gradient(trans = &quot;log10&quot;) + ggtitle(&quot;Cumulative Incidence of Streptococcal Pharyngitis from 2010-2018 \n 5-9 Age Group&quot;)
+us_strep_byage_map_gg09
+#look by region over time by age group
+by_year_age_region_visits &lt;- aggregate(NVISITS ~ part + AGEGRP + PRIMARYCOND + YEAR, dat = by_year_age, sum)
+by_year_age_region_members &lt;- aggregate(NMEMB ~ part + AGEGRP + PRIMARYCOND + YEAR, dat = by_year_age, sum)
+by_year_age_region &lt;- left_join(by_year_age_region_visits,by_year_age_region_members)
+by_year_age_region &lt;- by_year_age_region |&gt; mutate(CI_per_hundred = NVISITS/NMEMB*100)
+by_year_age_region |&gt; ggplot(aes(YEAR, CI_per_hundred, group = part)) + geom_line(aes(color = part)) + facet_wrap(~AGEGRP)
+#showing by region instead
+
+by_year_age_region_tojoin &lt;- by_year_age_region |&gt; select(part, AGEGRP, YEAR, CI_per_hundred)
+us_strep_byage_map_tojoin &lt;- us_strep_byage_map |&gt; select(-CI_per_hundred)
+
+tmp &lt;- left_join(us_strep_byage_map_tojoin, by_year_age_region_tojoin)
+
+#now plotting youngest age group over time by region
+CIs_by_region &lt;- tmp
+
+CIs_by_region_04 &lt;- CIs_by_region |&gt; 
+  filter(AGEGRP == &quot;00_04&quot;)
+us_strep_byage_byregion_map_gg04 &lt;- us_base + geom_polygon(data = CIs_by_region_04, aes(fill = CI_per_hundred))+
+  geom_polygon(color = &quot;gray&quot;, fill = NA) + theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + facet_wrap(~YEAR) + scale_fill_gradient(trans = &quot;log10&quot;) + ggtitle(&quot;Cumulative Incidence of Streptococcal Pharyngitis from 2010-2018 \n 0-4 Age Group by Region&quot;)
+us_strep_byage_byregion_map_gg04
+#do same thing for 5-9 age group
+CIs_by_region_09 &lt;- CIs_by_region |&gt; 
+  filter(AGEGRP == &quot;05_09&quot;)
+us_strep_byage_byregion_map_gg09 &lt;- us_base + geom_polygon(data = CIs_by_region_09, aes(fill = CI_per_hundred))+
+  geom_polygon(color = &quot;gray&quot;, fill = NA) + theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + facet_wrap(~YEAR) + scale_fill_gradient(trans = &quot;log10&quot;) + ggtitle(&quot;Cumulative Incidence of Streptococcal Pharyngitis from 2010-2018 \n 5-9 Age Group by Region&quot;)
+us_strep_byage_byregion_map_gg09 
+#try by gender
+#can make plot for 1 age group that also has sex and use sex as second factor for grid
+by_year_sex_04 &lt;- by_year_age |&gt; filter(AGEGRP == &quot;00_04&quot;) #this doesnt have sex
+
+by_year_2 &lt;- by_year |&gt; mutate(state = tolower(state))
+by_year_region &lt;- left_join(by_year_2, state_parts_2)#this has sex, age group, region
+
+by_year_region
+
+by_year_region_sex_04 &lt;- by_year_region |&gt;
+  filter(AGEGRP == &quot;00_04&quot;) |&gt;
+  mutate(&quot;CI_per_hundred&quot; = NVISITS/NMEMB*100) |&gt; 
+  mutate(&quot;region&quot; = state) |&gt; 
+  mutate(&quot;SEX&quot; = as.factor(SEX))
+
+by_year_region_sex_04_formap &lt;- inner_join(by_year_region_sex_04, us_df, by = &quot;region&quot;)
+
+us_base + geom_polygon(data = by_year_region_sex_04_formap, aes(fill = CI_per_hundred))+
+  geom_polygon(color = &quot;gray&quot;, fill = NA) + theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + facet_grid(vars(SEX), vars(YEAR)) + scale_fill_gradient(trans = &quot;log10&quot;) + ggtitle(&quot;Cumulative Incidence of Streptococcal Pharyngitis from 2010-2018 \n 0-4 Age Group by Sex&quot;)
+by_year_region_sex_09 &lt;- by_year_region |&gt;
+  filter(AGEGRP == &quot;05_09&quot;) |&gt;
+  mutate(&quot;CI_per_hundred&quot; = NVISITS/NMEMB*100) |&gt; 
+  mutate(&quot;region&quot; = state) |&gt; 
+  mutate(&quot;SEX&quot; = as.factor(SEX))
+
+
+by_year_region_sex_09_formap &lt;- inner_join(by_year_region_sex_09, us_df, by = &quot;region&quot;)
+
+us_base + geom_polygon(data = by_year_region_sex_09_formap, aes(fill = CI_per_hundred))+
+  geom_polygon(color = &quot;gray&quot;, fill = NA) + theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + facet_grid(vars(SEX), vars(YEAR)) + scale_fill_gradient(trans = &quot;log10&quot;) + ggtitle(&quot;Cumulative Incidence of Streptococcal Pharyngitis from 2010-2018 \n 5-9 Age Group by Sex&quot;)</code></pre>
 
 
 
