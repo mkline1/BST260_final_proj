@@ -7,11 +7,5 @@ navbar:
     - text: "Introduction"
       icon: fa-home
       href: index.html
-    - text: "Mapping"
-      href: Mapping.html
-    - text: "Models"
-      href: Models.html
-    - text: "Conclusions"
-      href: conclusions.html
-    - text: "References"
-      href: references.html
+    - text: "Tab 1"
+      href: tab1.html
