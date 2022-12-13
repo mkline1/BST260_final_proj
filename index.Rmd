@@ -1,5 +1,5 @@
 ---
-title: "Welcome to my website!"
+title: "Maddy Kline BST260 Final Project 2022"
 author: "Maddy Kline"
 ---
 
@@ -367,7 +367,7 @@ fluvax_strep_59_plot <- joint3_pivot |> ggplot(aes(x= MONTH, y = value, color = 
   facet_wrap(~YEAR) + scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT",
                                                                                                                                    "OCT", "NOV", "DEC")) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ggtitle("Strep Pharyngitis Rates and Flu Vaccination Over Time  \n 5-9 Age Group") + labs(linetype = "Value Plotted") + labs(color = "Region") + scale_linetype_discrete(labels = c("Flu Vaccination %", "Strep cases per 2,000"))
 
-grid.arrange(fluvax_strep_allages_plot,fluvax_strep_59_plot, ncol =2)
+grid.arrange(fluvax_strep_allages_plot,fluvax_strep_59_plot, nrow =2)
 
 
 ```
