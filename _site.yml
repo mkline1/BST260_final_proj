@@ -4,6 +4,14 @@ navbar:
   title: "Maddy Kline BST260 Final Project 2022"                             # CHANGE HERE 
 type: inverse
 left:
-  - text: "Home"
-icon: fa-home
-href: index.html
+  - text: "Introduction"
+    icon: fa-home
+    href: index.html
+  - text: "Mapping"
+    href: Napping.html
+  - text: "Models"
+    href: Models.html
+  - text: "Conclusions"
+    href: conclusions.html
+  - text: "References"
+    href: references.html

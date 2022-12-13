@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Maddy Kline" />
+
+
+<title>Mapping</title>
+
+<script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Maddy Kline BST260 Final Project 2022</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Mapping</h1>
+<h4 class="author">Maddy Kline</h4>
+
+</div>
+
+
+<p>As a first step in my analysis, I will do a descriptive analysis
+looking at case rates of streptococcal pharyngitis across states in the
+US over time.
+<img src="Mapping_files/figure-html/unnamed-chunk-5-1.png" width="960" /></p>
+<p>From this plot, we can see that that, across all age groups, cases of
+strep pharyngitis are much higher in states like Texas, Oklahoma,
+Mississippi, Tennessee and Kentucky have higher case rates, especially
+in more recent years (2016, 2017, 2018), and states in the Pacific
+Northwest such as California, Oregon, Washington, Montana and North
+Dakota, have lower case rates.</p>
+<p>We can look at how case rates trend by age group over time.
+<img src="Mapping_files/figure-html/unnamed-chunk-6-1.png" width="1920" /></p>
+<p>From these plots, we can see that the cases of streptococcal
+pharyngitis are highest in the 5-9 year old age group, as previously
+explained, and that there are relatively few cases in the older age
+groups, but cases persist at a low level across the country in the older
+age groups.</p>
+<p>How closely do these trends track with flu data? We can obtain the
+same data from MarketScan for flu data, using ICD codes: ICD9 4870,
+4871, 7878, ICD10: J100, J101, J108, J110, J111, and J118.</p>
+<p><img src="Mapping_files/figure-html/unnamed-chunk-7-1.png" width="960" /></p>
+<p>Here, we see similar regional trends play out, with a similar early
+fall divergence in the South compared to the other states. We could
+consider a situation in which people who have flu are more likely to get
+a secondary bacterial infection with streptococcus, or that the factors
+driving an increase in flu in the South are the same as the factors
+driving the increase in streptococcal pharyngitis. Will will consider
+flu cases in our statistical model of streptococcal pharyngitis
+cases.</p>
+<p>If flu drives cases of streptococcal pharyngitis, it would also be
+useful to look at how trends in flu vaccination map to cases of
+streptococcal pharyngitis. We obtain flu vaccination from the CDC
+website FluVaxView [5].</p>
+<p><img src="Mapping_files/figure-html/unnamed-chunk-8-1.png" width="960" /></p>
+<p>Here we see that flu vaccination rates are generally not especially
+high; ranging from 30-70% by November. Some states, especially in the
+Midwest, seem to have consistently higher flu vaccination than others,
+like Florida.</p>
+<p><img src="Mapping_files/figure-html/unnamed-chunk-9-1.png" width="960" /><img src="Mapping_files/figure-html/unnamed-chunk-9-2.png" width="960" /></p>
+<p>Data on flu vaccination starts in a given year in July, and is
+collected through May, then restarts in July again. We can compare flu
+vaccination coverage to streptococcal pharyngitis cases in all ages vs
+in just the 5-9 age group, which is the highest prevalence age group, as
+seen above. While in general, the Northeast has high rates of
+vaccination, and the other regions cluster pretty closely, there are a
+few examples of flu vaccination being lower in the South, particularly
+in the 2016-2017 and 2017-2018 flu seasons in all ages, although this
+does not seem to be the case in the 5-9 age group , where overall
+vaccination rates are generally higher.</p>
+<p>There is some evidence that the PCV vaccinate (against
+<em>Streptococcus pneumoniae</em>) can prevent early cases of otitis
+media, infection of the middle ear that can be caused by pneumococcus or
+other pathogens [6][7]. We are also interested in whether vaccination
+with PCV is protective against streptococcal pharyngitis. Data on PCV
+vaccination were obtained from CDC ChildVaxView [8]. The CDC currently
+recommends that children receive 4 doses of either PCV13 or PCV15 at 2
+months, 4 months, 6 months, and 12-15 months old. Children who miss
+doses are recommended to follow catch-up guidelines to receive their
+vaccinations [9]. The CDC reports this vaccination data by birth cohort
+from 2011-2018. Here we use data on whether children received all 4 PCV
+vaccinations by the age of 35 months. We use the birth cohorts from
+2011, 2012, and 2013 to compare to flu and streptococcal pharyngitis
+cases occurring in 2016, 2017, and 2018 in those in the 5-9 age
+group.</p>
+<p><img src="Mapping_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
+<p>These data show generally high vaccination (&gt;75% universally),
+with some variation from year to year as to which states have the
+highest coverage. We can group these birth cohorts to plot onto our case
+count data from streptococcal pharyngitis and flu by including the 2011
+birth cohort vaccination status for 5-9 year olds in the year 2016, 2011
+and 2012 for 5-9 year olds in 2017, and 2011, 2012, and 2013 for
+2018.</p>
+<p><img src="Mapping_files/figure-html/unnamed-chunk-11-1.png" width="960" />
+PCV coverage is pretty high across the regions in these years, and no
+clear trends jump out ofthis visualization. However, there are some
+variations from year to year in both cases and vaccination. For example,
+PCV vaccination appears to increase in the West over these 3 years, and
+cases of streptococcal pharyngitis go down.</p>
+<p>##Appendix</p>
+<pre class="r"><code>knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(stringr)
+library(ggplot2)
+library(usmap)
+library(gridExtra)
+library(maps)
+library(mapdata)
+library(ggmap)
+library(lmtest)
+
+#Read in data on cases
+dat &lt;- read_csv(&quot;/Users/madeleinekline/Dropbox (Harvard University)/G1/GradLab/StrepPharyngitis/output/GeoVisits.csv&quot;)
+
+#Read in data on membership
+coh &lt;- read_csv(&quot;/Users/madeleinekline/Dropbox (Harvard University)/G1/GradLab/StrepPharyngitis/output/GeoCohort.csv&quot;)
+#this dataframe has population by sex, age group, and state but not by month. So need to add it to the other dataframe once already collapsed by year. 
+
+#get data by year, rather than by month:
+by_year &lt;- aggregate(NVISITS ~ YEAR + STATE + SEX + AGEGRP + PRIMARYCOND, dat, sum)
+#we can then join this with the population data from cohort
+by_year &lt;- left_join(by_year, coh)
+
+# by_year |&gt; group_by(YEAR) |&gt; summarize(total_vis = sum(NVISITS), total_memb = sum(NMEMB), CI = round(total_vis/total_memb,4)) |&gt; ggplot(aes(x=YEAR, y = CI)) + geom_bar(stat = &quot;identity&quot;, fill = &quot;steelblue&quot;) + theme_bw() + geom_text(aes(label=CI), vjust=1.6, color=&quot;white&quot;, size=2.0) + ylab(&quot;Cases per person&quot;) +  ggtitle(&quot;Total Strep Pharyngitis Visits per Member by Year US&quot;)
+
+
+#let&#39;s summarize cumulative incidence by state across years to start
+by_state &lt;- by_year |&gt;
+  group_by(YEAR, STATE) |&gt;
+  summarize(visits = sum(NVISITS), members = sum(NMEMB), CI = visits/members)
+
+#we now manipulate the data slightly to show CI per hundred, and make the state names match the mapping dataframe
+strep_all &lt;- by_state |&gt; mutate(region = tolower(STATE), CI_per_hundred = CI*100) |&gt;
+  select(region, CI_per_hundred)
+
+
+
+#now we add region designations for &quot;northeast&quot;, &quot;south&quot;, &quot;midwest&quot;, and &quot;west&quot;
+#add regions to this dataframe
+#make a function that converts lists of state abbreviations to lists of state names
+to_statename &lt;- function(list){
+  new_list &lt;- c()
+  for(i in 1:length(list)){
+    name &lt;- state.name[grep(list[i], state.abb)] 
+    new_list &lt;- append(new_list, name)
+  }
+  new_list
+}
+
+northeast_states &lt;- tolower(to_statename(.northeast_region))
+midwest_states &lt;- tolower(to_statename(.midwest_region))
+south_states &lt;- tolower(to_statename(.south_region))
+west_states &lt;- tolower(to_statename(.west_region))
+
+northeast_df &lt;- data.frame(region = northeast_states, part = &quot;northeast&quot;) 
+midwest_df &lt;- data.frame(region = midwest_states, part = &quot;midwest&quot;)   
+south_df &lt;- data.frame(region = south_states, part = &quot;south&quot;) 
+west_df &lt;- data.frame(region = west_states, part = &quot;west&quot;)
+#will put dc in the south because maryland and viriginia are
+dc_df &lt;- data.frame(region = &quot;washington dc&quot;, part = &quot;south&quot;)
+
+
+state_parts &lt;- rbind(northeast_df, midwest_df, south_df, west_df, dc_df)
+
+
+strep_all_region &lt;- left_join(strep_all, state_parts, by = &quot;region&quot;)
+
+#now we look at the data by age group across all regions
+by_year &lt;- by_year |&gt; mutate(&quot;state&quot; = STATE)
+by_year_age_visits &lt;- aggregate(NVISITS ~ YEAR + state + AGEGRP + PRIMARYCOND, dat = by_year, sum)
+by_year_age_membs &lt;- aggregate(NMEMB ~ YEAR + state + AGEGRP + PRIMARYCOND, dat = by_year, sum)
+by_year_age &lt;- left_join(by_year_age_visits, by_year_age_membs)
+by_year_age &lt;- by_year_age |&gt; mutate(CI_per_hundred = NVISITS/NMEMB *100, state = tolower(state))
+
+#add in region just in case?
+state_parts_2 &lt;- state_parts
+names(state_parts_2)[1] &lt;- &quot;state&quot;
+
+by_year_age &lt;- left_join(by_year_age, state_parts_2)
+#make a plot of trends over time by state
+
+
+country_by_age &lt;- left_join(aggregate(NVISITS ~ AGEGRP + YEAR, dat = by_year_age, sum), aggregate(NMEMB ~ AGEGRP + YEAR, dat = by_year_age, sum))
+country_by_age &lt;- country_by_age |&gt; mutate(CI_per_hundred = NVISITS/NMEMB * 100)
+
+# country_by_age |&gt; ggplot(aes(YEAR, CI_per_hundred, group = AGEGRP)) + geom_line(aes(color = AGEGRP)) + ggtitle(&quot;Streptococcal Pharyngitis in the US from 2010-2018 \n By Age Group&quot;) + theme_bw() + ylab(&quot;Cases per 100 People&quot;) + labs(color = &quot;Age Group&quot;)
+
+
+
+states_indiv_region &lt;- strep_all_region |&gt; group_by(YEAR, region) |&gt; ggplot(aes(YEAR, CI_per_hundred, group=region)) + geom_line(aes(col = part)) + ggtitle(&quot;Streptococcal Pharyngitis In All States by Region&quot;) + ylab(&quot;Cases per 100 People&quot;) + theme_bw() + labs(color = &quot;Region&quot;)
+
+#now group them by region and just report 1 value per region
+
+by_state_2 &lt;- by_state |&gt; mutate(state = tolower(STATE))
+strep_region_visits &lt;- left_join(by_state_2, state_parts_2, by = &quot;state&quot;)
+strep_region_visits_agg &lt;- aggregate(visits~ part + YEAR, dat = strep_region_visits, sum)
+strep_region_members_agg &lt;- aggregate(members~ part + YEAR, dat = strep_region_visits, sum)
+strep_region_joined &lt;- left_join(strep_region_visits_agg, strep_region_members_agg)
+strep_region_joined &lt;- strep_region_joined |&gt; mutate(CI_per_hundred = visits/members * 100)
+
+per_region&lt;- strep_region_joined |&gt; group_by(YEAR, part) |&gt; ggplot(aes(YEAR, CI_per_hundred, group=part)) + geom_line(aes(col = part)) + ggtitle(&quot;Streptococcal Pharyngitis By Region&quot;) +ylab(&quot;Cases per 100 People&quot;) + theme_bw() + labs(color = &quot;Region&quot;)
+
+#grid.arrange(states_indiv_region, per_region, ncol=2)
+
+#try by month; first just plot data by region for all age groups together
+#should be able to just merge these two because the members are stable over the year
+by_month_all &lt;- left_join(dat, coh)
+
+#consolidate across sex and check if this is what you needed to do earlier on as well;
+#to consolidate across sex, will just need to add so that should be fine 
+by_month_age_vis &lt;- aggregate(NVISITS ~ MONTH + STATE + AGEGRP + YEAR, dat = by_month_all, sum)
+memb_no_sex &lt;- aggregate(NMEMB ~  STATE +AGEGRP + YEAR, dat = coh, sum)
+by_month_no_sex &lt;- left_join(by_month_age_vis, memb_no_sex)
+by_month_no_sex &lt;- by_month_no_sex |&gt; mutate(&quot;CI_per_thousand&quot; = NVISITS/NMEMB*1000)
+
+
+
+by_month_no_sex_lowercase &lt;- by_month_no_sex |&gt; mutate(&quot;state&quot; = tolower(STATE))
+by_month_regions &lt;- left_join(by_month_no_sex_lowercase, state_parts_2, by = &quot;state&quot;)
+by_month_regions_only_vis &lt;- aggregate(NVISITS ~ part  + YEAR + MONTH, 
+                                       dat = by_month_regions,
+                                       sum)
+by_month_regions_only_memb &lt;- aggregate(NMEMB ~ part  + YEAR + MONTH, 
+                                       dat = by_month_regions,
+                                       sum)
+
+
+by_month_regions_only &lt;- left_join(by_month_regions_only_vis, by_month_regions_only_memb)
+by_month_regions_only &lt;- by_month_regions_only |&gt; mutate(&quot;CI_per_thousand&quot; = NVISITS/NMEMB *1000)
+# by_month_regions_only |&gt; ggplot(aes(x = MONTH, y = CI_per_thousand, group = part)) + 
+#   geom_line(aes(color = part)) +
+#   facet_wrap(~YEAR) + ggtitle(&quot;Steptococcal Pharyngitis Cases Incidence by Month \n All Ages, by Region&quot;) + labs(color = &quot;Region&quot;) + ylab(&quot;Cases per 1,000 People&quot;) +scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;,
+#                                                                                                                                    &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+
+
+#we now load in US mapping data from the maps package
+us_df &lt;- map_data(&quot;state&quot;)
+
+#this creates a base US map to build upon
+us_base &lt;- ggplot(data = us_df, mapping = aes(x = long, y = lat, group =group))+
+  coord_fixed(1.3) + geom_polygon(color=&quot;black&quot;, fill = &quot;gray&quot;)
+
+#we join our dataframe with strep info with our mapping dataframe
+us_strep_all &lt;- inner_join(us_df, strep_all, by = &quot;region&quot;)
+us_strep_rates_over_time &lt;- us_base + geom_polygon(data = us_strep_all, aes(fill = CI_per_hundred))+
+  geom_polygon(color = &quot;gray&quot;, fill = NA) + theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + facet_wrap(~YEAR) + scale_fill_gradient(low = &quot;#FFFFFF&quot;, high = &quot;#FF0000&quot; ) + ggtitle(&quot;Cumulative Incidence of Streptococcal Pharyngitis from 2010-2018 \n All Ages&quot;) + labs(fill = &quot;Cases per 100 People&quot;)
+us_strep_rates_over_time
+
+
+#making maps for age group trends over time
+by_year_age_formap &lt;- by_year_age
+names(by_year_age_formap)[2] = &quot;region&quot;
+us_strep_byage_map &lt;- inner_join(us_df, by_year_age_formap, by = &quot;region&quot;)
+#attempt facet_grid with year as the column and age group as the row
+us_strep_byage_map_gg &lt;- us_base + 
+  geom_polygon(data = us_strep_byage_map, aes(fill = CI_per_hundred)) +
+    geom_polygon(color = &quot;gray&quot;, fill = NA) + 
+  theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + scale_fill_gradient(low = &quot;#FFFFFF&quot;, high = &quot;#FF0000&quot; ) + ggtitle(&quot;Cumulative Incidence of Streptococcal Pharyngitis from 2010-2018 \n By Age Group&quot;) + labs(fill = &quot;Cases per 100 People&quot;)
+
+us_strep_byage_map_gg + facet_grid(rows = vars(AGEGRP), cols = vars(YEAR) )
+#now for flu case data
+flu_dat &lt;- read_csv(&quot;/Users/madeleinekline/Dropbox (Harvard University)/G1/GradLab/StrepPharyngitis/output/GeoVisitsFlu.CSV&quot;)
+flu_coh &lt;- read_csv(&quot;/Users/madeleinekline/Dropbox (Harvard University)/G1/GradLab/StrepPharyngitis/output/GeoCohortFlu.csv&quot;) #this is the same as strep data
+
+#do same thing that did for strep cases to start
+#should be able to just merge these two because the members are stable over the year
+by_month_all_flu &lt;- left_join(flu_dat, flu_coh)
+
+flu_by_month_age_vis &lt;- aggregate(NVISITS ~ MONTH + STATE + AGEGRP + YEAR, dat = by_month_all_flu, sum)
+flu_memb_no_sex &lt;- aggregate(NMEMB ~  STATE +AGEGRP + YEAR, dat = flu_coh, sum)
+flu_by_month_no_sex &lt;- left_join(flu_by_month_age_vis, flu_memb_no_sex)
+flu_by_month_no_sex &lt;- flu_by_month_no_sex |&gt; 
+  mutate(&quot;CI_per_thousand&quot; = NVISITS/NMEMB*1000) |&gt;
+  mutate(&quot;CI_per_ten_thousand&quot; =NVISITS/NMEMB*10000 )
+
+flu_by_month_no_sex_lowercase &lt;- flu_by_month_no_sex |&gt; mutate(&quot;state&quot; = tolower(STATE))
+flu_by_month_regions &lt;- left_join(flu_by_month_no_sex_lowercase, state_parts_2, by = &quot;state&quot;)
+flu_by_month_regions_only_vis &lt;- aggregate(NVISITS ~ part  + YEAR + MONTH, 
+                                       dat = flu_by_month_regions,
+                                       sum)
+flu_by_month_regions_only_memb &lt;- aggregate(NMEMB ~ part  + YEAR + MONTH, 
+                                       dat = flu_by_month_regions,
+                                       sum)
+
+flu_by_month_regions_only &lt;- left_join(flu_by_month_regions_only_vis, flu_by_month_regions_only_memb)
+flu_by_month_regions_only &lt;- flu_by_month_regions_only |&gt; mutate(&quot;CI_per_thousand&quot; = NVISITS/NMEMB *1000,
+                                                                 &quot;CI_per_ten_thousand&quot; = NVISITS/NMEMB *10000,
+                                                                 &quot;CI_per_hundred_thousand&quot; = NVISITS/NMEMB *100000)
+
+flu_by_month_regions_only |&gt; ggplot(aes(x = MONTH, y = CI_per_thousand, group = part)) + 
+  geom_line(aes(color = part)) + scale_y_continuous(trans = &quot;log10&quot;) +
+  facet_wrap(~YEAR) + scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;,
+                                                                                                                                   &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ggtitle(&quot;Flu Cases Over Time \n All Ages&quot;) 
+
+#need to figure out where data is missing 
+
+flu_vax &lt;- read_csv(&quot;/Users/madeleinekline/Dropbox (Harvard University)/G1/GradLab/flu_data/Influenza_Vaccination_Coverage_for_All_Ages__6__Months_.csv&quot;)
+
+flu_vax_filt &lt;- flu_vax |&gt; 
+  filter(`Season/Survey Year` %in% c(&quot;2009-10&quot;, &quot;2010-11&quot;, &quot;2011-12&quot;,
+                                                                   &quot;2012-13&quot;, &quot;2013-14&quot;, &quot;2014-15&quot;,
+                                                                   &quot;2015-16&quot;, &quot;2016-17&quot;, &quot;2017-18&quot;,
+                                                                   &quot;2018-19&quot;)) |&gt;
+  filter(Dimension %in% c(&quot;≥6 Months&quot;,&quot;6 Months - 17 Years&quot;, &quot;≥18 Years&quot; , &quot;6 Months - 4 Years&quot; ,
+                          &quot;5-12 Years&quot;,  &quot;13-17 Years&quot;)) |&gt;
+  mutate(state = tolower(Geography)) |&gt;
+  filter(state %in% state_parts_2$state) |&gt;
+  select(-`Geography Type`, -Vaccine, -FIPS, -`Dimension Type`)
+
+#need to put the years on the same year scale as the cases data
+flu_vax_filt &lt;- flu_vax_filt |&gt; mutate(year_lower = substr(`Season/Survey Year`, 1,4),
+                       year_higher = paste0(&quot;20&quot;,str_sub(`Season/Survey Year`, -2, -1)),
+                       year = ifelse(Month %in% c(7,8,9,10,11,12), year_lower, 
+                                     ifelse(Month %in% c(1,2,3,4,5), year_higher, NA)),
+                       state = tolower(Geography),
+                       coverage = as.numeric(`Estimate (%)`))
+
+#add region to this 
+flu_vax_filt &lt;- left_join(flu_vax_filt, state_parts_2, by= &quot;state&quot;)
+flu_vax_filt_2 &lt;- flu_vax_filt |&gt; mutate(STATE = Geography, YEAR = as.numeric(year)) |&gt;
+  select(Month, STATE, Dimension, `Estimate (%)`,YEAR, part) |&gt; filter(YEAR != 2009)
+
+#for the sake of the geographic analysis, I will show flu vaccination rates in 5-9 year olds by november of each year in each state
+fluvax_map &lt;- flu_vax_filt_2 |&gt; 
+  filter(Dimension == &quot;5-12 Years&quot;, Month == 11 ) |&gt; 
+  mutate(region = tolower(STATE)) |&gt;
+  left_join(us_df)
+  
+us_base + geom_polygon(data = fluvax_map, aes(fill = as.numeric(`Estimate (%)`)))+
+  geom_polygon(color = &quot;gray&quot;, fill = NA) + theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + facet_wrap(~YEAR) + scale_fill_gradient(low = &quot;#FFFFFF&quot;, high = &quot;#F05E16&quot; ) + ggtitle(&quot;November Flu Vaccination Coverage&quot;)
+
+fluvax_map$YEAR
+
+
+#now take &gt;6 months, which is vaccination in all ages. Do 5-12 separately
+flu_vax_filt_allages &lt;- flu_vax_filt_2 |&gt; filter(Dimension == &quot;≥6 Months&quot;)
+
+#get the cohort membership by state from the original dataframe
+coh_fluvax_allages &lt;- aggregate(NMEMB ~ STATE + YEAR, data = coh, sum)
+flu_vax_rescale_allages &lt;- left_join(flu_vax_filt_allages, coh_fluvax_allages) |&gt; 
+  mutate(sample_vaxxed = as.numeric(`Estimate (%)`)*1/100*NMEMB)
+#aggregate the members and sample vaxxed
+flu_vax_rescale_allages_memb &lt;- aggregate(NMEMB ~ part + YEAR + Month, data = flu_vax_rescale_allages, sum)
+flu_vax_rescale_allages_vax &lt;- aggregate(sample_vaxxed ~ part + YEAR + Month, data = flu_vax_rescale_allages, sum)
+flu_vax_rescale_allages_comb &lt;- left_join(flu_vax_rescale_allages_vax, flu_vax_rescale_allages_memb) |&gt; mutate(flu_coverage = sample_vaxxed / NMEMB* 100)
+
+
+#aggregate(NMEMB ~ STATE + YEAR, data = by_month_regions, sum)
+#aggregate(NMEMB ~ STATE + YEAR, data = flu_by_month_regions, sum)
+#these are different by a factor of 12, which makes sense because in one case I am summing over all the months.
+#I think this is still what I want, but need to check with stephen. Shouldn&#39;t affect scaling though cuz its just off by a factor of 12 which will come out regardless
+
+#do the same thing for the 5-9 age group
+flu_vax_filt_512 &lt;- flu_vax_filt_2 |&gt; filter(Dimension == &quot;5-12 Years&quot;)
+coh_fluvax_59 &lt;- aggregate(NMEMB~ STATE + YEAR + AGEGRP, data = coh, sum) |&gt; filter(AGEGRP == &quot;05_09&quot;)
+flu_vax_rescale_5 &lt;- left_join(flu_vax_filt_512, coh_fluvax_59) |&gt; mutate(sample_vaxxed = as.numeric(`Estimate (%)`)*1/100*NMEMB)
+flu_vax_rescale_5_memb &lt;- aggregate(NMEMB ~ part + YEAR + Month, data = flu_vax_rescale_5, sum)
+flu_vax_rescale_5_vax &lt;- aggregate(sample_vaxxed ~ part + YEAR + Month, data = flu_vax_rescale_5, sum)
+flu_vax_rescale_5_comb &lt;- left_join(flu_vax_rescale_5_memb, flu_vax_rescale_5_vax) |&gt;
+  mutate(flu_coverage = sample_vaxxed / NMEMB * 100)
+
+#plot the strep and flu vaccine data ontop of one another for all ages, and for 5-9 age group specifically
+flu_vax_rescale_allages_comb &lt;- flu_vax_rescale_allages_comb |&gt; mutate(MONTH = Month) |&gt; select(-Month)
+joint2 &lt;- by_month_regions_only |&gt; select(-NVISITS, -NMEMB) |&gt; left_join(flu_vax_rescale_allages_comb) |&gt;
+  select(-sample_vaxxed, -NMEMB) |&gt; mutate(Strep_CI_per_ten_thousand = CI_per_thousand*10)
+joint2_pivot &lt;- joint2|&gt; pivot_longer(cols = c(&quot;Strep_CI_per_ten_thousand&quot;, &quot;flu_coverage&quot;))
+fluvax_strep_allages_plot &lt;- joint2_pivot |&gt; ggplot(aes(x= MONTH, y = value, color = part)) + 
+  geom_line(aes(linetype = name)) + 
+  facet_wrap(~YEAR) + scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;,
+                                                                                                                                   &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ggtitle(&quot;Strep Pharyngitis Rates and Flu Vaccination Over Time  \n All Ages, scaled to MarketScan maybe&quot;) + labs(linetype = &quot;Value Plotted&quot;) + labs(color = &quot;Region&quot;) + scale_linetype_discrete(labels = c(&quot;Flu Vaccination %&quot;, &quot;Strep cases per 10,000&quot;))
+
+
+#for 5-9 age group
+by_month_regions_5 &lt;- by_month_regions |&gt; filter(AGEGRP %in% c(&quot;05_09&quot;))
+by_month_regions_5_vis &lt;- aggregate(NVISITS ~ part  + YEAR + MONTH, 
+                                       dat = by_month_regions_5,
+                                       sum)
+by_month_regions_5_memb &lt;- aggregate(NMEMB ~ part  + YEAR + MONTH, 
+                                       dat = by_month_regions_5,
+                                       sum)
+by_month_regions_5 &lt;- left_join(by_month_regions_5_vis, by_month_regions_5_memb)
+by_month_regions_5 &lt;- by_month_regions_5 |&gt; mutate(&quot;CI_per_thousand&quot; = NVISITS/NMEMB *1000)
+#fluvax data
+flu_vax_rescale_5_comb &lt;- flu_vax_rescale_5_comb |&gt; mutate(MONTH = Month) |&gt; select(-Month)
+joint3 &lt;- by_month_regions_5 |&gt; select(-NVISITS, -NMEMB) |&gt; left_join(flu_vax_rescale_5_comb) |&gt;
+  select(-sample_vaxxed, -NMEMB) |&gt; mutate(Strep_CI_per_ten_thousand = CI_per_thousand*10, Strep_CI_per_five_thousand = CI_per_thousand*5, Strep_CI_per_two_thousand = CI_per_thousand*2)
+joint3_pivot &lt;- joint3 |&gt; pivot_longer(cols = c(&quot;Strep_CI_per_two_thousand&quot;, &quot;flu_coverage&quot;))
+fluvax_strep_59_plot &lt;- joint3_pivot |&gt; ggplot(aes(x= MONTH, y = value, color = part)) + 
+  geom_line(aes(linetype = name)) + 
+  facet_wrap(~YEAR) + scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;,
+                                                                                                                                   &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ggtitle(&quot;Strep Pharyngitis Rates and Flu Vaccination Over Time  \n 5-9 Age Group&quot;) + labs(linetype = &quot;Value Plotted&quot;) + labs(color = &quot;Region&quot;) + scale_linetype_discrete(labels = c(&quot;Flu Vaccination %&quot;, &quot;Strep cases per 2,000&quot;))
+
+fluvax_strep_allages_plot
+fluvax_strep_59_plot
+
+
+childvax_data &lt;- read_csv(&quot;/Users/madeleinekline/Dropbox (Harvard University)/G1/GradLab/vax_data/Vaccination_Coverage_among_Young_Children__0-35_Months_.csv&quot;)
+pcv_vax &lt;- childvax_data |&gt; filter(Vaccine == &quot;PCV&quot;)
+pcv_4d_35m &lt;- pcv_vax |&gt; filter(Dose == &quot;≥4 Doses&quot;) |&gt; filter(Dimension == &quot;35 Months&quot;)
+pcv_4d_35m &lt;- pcv_4d_35m |&gt; filter(`Birth Year/Birth Cohort` %in% c(&#39;2011&#39;, &#39;2012&#39;, &#39;2013&#39;, 
+                                                    &#39;2014&#39;, &#39;2015&#39;, &#39;2016&#39;, &#39;2017&#39;, &#39;2018&#39;)) |&gt;
+  mutate(year = as.numeric(`Birth Year/Birth Cohort`), region = tolower(Geography))
+pcv_map &lt;- pcv_4d_35m |&gt; filter(year %in% c(2011,2012,2013)) |&gt; left_join(us_df)
+pcv_over_time_4d35m &lt;- us_base + geom_polygon(data = pcv_map, aes(fill = `Estimate (%)`))+
+  geom_polygon(color = &quot;gray&quot;, fill = NA) + theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  panel.border = element_blank(),
+  panel.grid = element_blank(),
+  axis.title = element_blank()
+  ) + facet_wrap(~year) + scale_fill_gradient(low = &quot;#FFFFFF&quot;, high = &quot;#800000&quot; ) + ggtitle(&quot;PCV Vaccination by 35 months by birth cohort&quot;)
+pcv_over_time_4d35m
+
+
+pcv_grouping &lt;- pcv_4d_35m |&gt; filter(`Birth Year/Birth Cohort` %in% c(&quot;2011&quot;, &quot;2012&quot;, &quot;2013&quot;)) |&gt; 
+  mutate(STATE = Geography, YEAR = as.numeric(`Birth Year/Birth Cohort`)) |&gt;
+  select(Vaccine, STATE, `Estimate (%)`, YEAR, `Sample Size`) 
+pcv_memb_ag &lt;- coh |&gt; filter(YEAR %in% c(&quot;2011&quot;, &quot;2012&quot;, &quot;2013&quot;), AGEGRP == &quot;00_04&quot;)
+pcv_memb_ag &lt;- aggregate(NMEMB ~ STATE + AGEGRP + YEAR, dat = pcv_memb_ag, sum)
+pcv_memb_ag &lt;- pcv_memb_ag |&gt; mutate(YEAR = as.numeric(YEAR))
+pcv_grouped &lt;- left_join(pcv_grouping, pcv_memb_ag)
+pcv_grouped &lt;- pcv_grouped |&gt; mutate(sample_vaxxed = `Estimate (%)`*0.01 *NMEMB)
+pcv_grouped &lt;- pcv_grouped |&gt; mutate(state = tolower(STATE))
+pcv_grouped &lt;- left_join(pcv_grouped, state_parts_2)
+pcv_grouped_2016 &lt;- pcv_grouped |&gt; filter(YEAR == 2011) |&gt; na.omit() #NAs are for regions that aren&#39;t states; ok to omit
+pcv_grouped_2017 &lt;- pcv_grouped |&gt; filter(YEAR %in% c(2011, 2012)) |&gt; na.omit()
+pcv_grouped_2018 &lt;- pcv_grouped |&gt; na.omit()
+
+pcv_grouped_2016_vaxxed &lt;- aggregate(sample_vaxxed ~ part, data = pcv_grouped_2016, sum)
+pcv_grouped_2016_memb &lt;- aggregate(NMEMB ~ part, data = pcv_grouped_2016, sum)
+pcv_2016_ag_region &lt;- left_join(pcv_grouped_2016_memb, pcv_grouped_2016_vaxxed) |&gt; mutate(pcv_coverage = sample_vaxxed / NMEMB * 100, YEAR = 2016)
+
+pcv_grouped_2017_vaxxed &lt;- aggregate(sample_vaxxed ~ part, data = pcv_grouped_2017, sum)
+pcv_grouped_2017_memb &lt;- aggregate(NMEMB ~part, data = pcv_grouped_2017, sum)
+pcv_2017_ag_region &lt;- left_join(pcv_grouped_2017_memb, pcv_grouped_2017_vaxxed) |&gt; mutate(pcv_coverage = sample_vaxxed / NMEMB * 100, YEAR = 2017)
+
+pcv_grouped_2018_vaxxed &lt;- aggregate(sample_vaxxed ~ part, data = pcv_grouped_2018, sum)
+pcv_grouped_2018_memb &lt;- aggregate(NMEMB ~part, data = pcv_grouped_2018, sum)
+pcv_2018_ag_region &lt;- left_join(pcv_grouped_2018_memb, pcv_grouped_2018_vaxxed) |&gt; mutate(pcv_coverage = sample_vaxxed / NMEMB * 100, YEAR = 2018)
+
+all_pcv &lt;- rbind(pcv_2016_ag_region, pcv_2017_ag_region, pcv_2018_ag_region) |&gt; select(part, pcv_coverage, YEAR) #coverage for 5-9 year olds
+
+#plot it ontop of strep cases 
+#look by region over time by age group
+by_year_age_region_visits &lt;- aggregate(NVISITS ~ part + AGEGRP + PRIMARYCOND + YEAR, dat = by_year_age, sum)
+by_year_age_region_members &lt;- aggregate(NMEMB ~ part + AGEGRP + PRIMARYCOND + YEAR, dat = by_year_age, sum)
+by_year_age_region &lt;- left_join(by_year_age_region_visits,by_year_age_region_members)
+by_year_age_region &lt;- by_year_age_region |&gt; mutate(CI_per_hundred = NVISITS/NMEMB*100)
+strep_for_pcv &lt;- by_year_age_region |&gt; filter(AGEGRP == &quot;05_09&quot;, YEAR %in% c(2016, 2017, 2018)) |&gt;
+  mutate(Strep_CI_per_hundred = CI_per_hundred) |&gt; select(part, YEAR, Strep_CI_per_hundred)
+strep_pcv &lt;- left_join(strep_for_pcv, all_pcv) |&gt; mutate(Strep_CI_per_five_hundred = Strep_CI_per_hundred *5) |&gt;
+  select(-Strep_CI_per_hundred)
+strep_pcv_pivoted &lt;- pivot_longer(strep_pcv, cols = c(&quot;Strep_CI_per_five_hundred&quot;, &quot;pcv_coverage&quot;))
+# strep_pcv_pivoted|&gt; 
+#   ggplot(aes(x= YEAR, y = value, color = part)) + 
+#   geom_line(aes(linetype = name)) + scale_x_discrete(limits = c(2016, 2017, 2018))
+
+#maybe separate by region, do barplots
+midwest &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;midwest&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#C21807&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases Midwest&quot;)
+
+northeast &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;northeast&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#658354&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases Northeast&quot;)
+
+west &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;west&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#7852A9&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases West&quot;)
+
+south &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;south&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#6699CC&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases South&quot;)
+
+grid.arrange(midwest, northeast, west, south, ncol = 2, nrow =2)</code></pre>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

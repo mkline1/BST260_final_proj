@@ -1,13 +1,11 @@
 ---
-title: "Maddy Kline BST260 Final Project 2022"
+title: "Mapping"
 author: "Maddy Kline"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
-Streptococcal pharyngitis, known colloquially as “strep throat,” is the number one cause of pharyngitis in children, accounting for 15-30% of pharyngitis between the ages of 5-15, and up to as many as 35-40% of cases during the winter and early spring. There is an estimated prevalence is 37% among children[1][2][3] . Symptoms typically include a characteristic sore throat, sometimes alongside fever, abdominal pain, or headache. Streptococcal pharyngitis is caused by group A Streptococcus, or Streptococcus pyogenes, and is clearly diagnosed with the rapid antigen detection test, throat culture, or NAAT. Treatment with the appropriate penicillin antibiotics is recommended to decrease the chance of some complications, including acute rheumatic fever, which can cause lasting cardiac valvular damage. There are known geographic patterns across the US for some other respiratory illnesses, including influenza, which is known to start in the south east and rise in other parts of the country after that [4]. Comparatively little is known about the geographic distribution of streptococcal pharyngitis in the US. The MarketScan database, comprised of insurance claims data from private insurers across the US, provides an opportunity to investigate the distribution of streptococcal pharyngitis in the US. Claims data for streptococcal pharyngitis were extracted from MarketScan, separated by year 2010-2018, month, sex, age group, and state. Data for flu with the same properties was also extracted from MarketScan for comparison, and vaccination data for flu and PCV were obtained through CDC FluVax and ChildVax respectively. The question we seek to address is whether rates of streptococcal pharyngitis are different in different parts of the country, and if so, what factors contribute to these differences.
 
 ```{r, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 library(tidyverse)
@@ -32,11 +30,11 @@ by_year <- aggregate(NVISITS ~ YEAR + STATE + SEX + AGEGRP + PRIMARYCOND, dat, s
 #we can then join this with the population data from cohort
 by_year <- left_join(by_year, coh)
 
-by_year |> group_by(YEAR) |> summarize(total_vis = sum(NVISITS), total_memb = sum(NMEMB), CI = round(total_vis/total_memb,4)) |> ggplot(aes(x=YEAR, y = CI)) + geom_bar(stat = "identity", fill = "steelblue") + theme_bw() + geom_text(aes(label=CI), vjust=1.6, color="white", size=2.0) + ylab("Cases per person") +  ggtitle("Total Strep Pharyngitis Visits per Member by Year US")
+# by_year |> group_by(YEAR) |> summarize(total_vis = sum(NVISITS), total_memb = sum(NMEMB), CI = round(total_vis/total_memb,4)) |> ggplot(aes(x=YEAR, y = CI)) + geom_bar(stat = "identity", fill = "steelblue") + theme_bw() + geom_text(aes(label=CI), vjust=1.6, color="white", size=2.0) + ylab("Cases per person") +  ggtitle("Total Strep Pharyngitis Visits per Member by Year US")
 
 
 ```
-We can see from this graph that the cases per person of streptococcal pharyngitis are relatively stable from year to year between 2010-2018, with slightly higher cases in 2011 and 2016-217. We can  separate by age and see that streptococcal pharyngitis is most common in 5-9 year olds, followed by 0-4 year olds, then 10-19 year olds, and there are not many cases in people older than 20, which is consistent with the known distribution of streptococcal pharyngitis as stated above.. 
+
 
 ```{r, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 #let's summarize cumulative incidence by state across years to start
@@ -98,11 +96,10 @@ by_year_age <- left_join(by_year_age, state_parts_2)
 country_by_age <- left_join(aggregate(NVISITS ~ AGEGRP + YEAR, dat = by_year_age, sum), aggregate(NMEMB ~ AGEGRP + YEAR, dat = by_year_age, sum))
 country_by_age <- country_by_age |> mutate(CI_per_hundred = NVISITS/NMEMB * 100)
 
-country_by_age |> ggplot(aes(YEAR, CI_per_hundred, group = AGEGRP)) + geom_line(aes(color = AGEGRP)) + ggtitle("Streptococcal Pharyngitis in the US from 2010-2018 \n By Age Group") + theme_bw() + ylab("Cases per 100 People") + labs(color = "Age Group")
+# country_by_age |> ggplot(aes(YEAR, CI_per_hundred, group = AGEGRP)) + geom_line(aes(color = AGEGRP)) + ggtitle("Streptococcal Pharyngitis in the US from 2010-2018 \n By Age Group") + theme_bw() + ylab("Cases per 100 People") + labs(color = "Age Group")
 
 ```
 
-We can split this data by region to see if there are trends that differ in different parts of the country.
 ```{r, fig.width = 10, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 
 
@@ -119,10 +116,9 @@ strep_region_joined <- strep_region_joined |> mutate(CI_per_hundred = visits/mem
 
 per_region<- strep_region_joined |> group_by(YEAR, part) |> ggplot(aes(YEAR, CI_per_hundred, group=part)) + geom_line(aes(col = part)) + ggtitle("Streptococcal Pharyngitis By Region") +ylab("Cases per 100 People") + theme_bw() + labs(color = "Region")
 
-grid.arrange(states_indiv_region, per_region, ncol=2)
+#grid.arrange(states_indiv_region, per_region, ncol=2)
 
 ```
-From this plot we can see that streptococcal pharyngitis cases are generally higher in the South, and lower in the West, and that this trend holds across time. We can further stratify case data by month to see if there are differences in trends throughout the year by region.
 
 ```{r, fig.width = 10, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 #try by month; first just plot data by region for all age groups together
@@ -150,20 +146,15 @@ by_month_regions_only_memb <- aggregate(NMEMB ~ part  + YEAR + MONTH,
 
 by_month_regions_only <- left_join(by_month_regions_only_vis, by_month_regions_only_memb)
 by_month_regions_only <- by_month_regions_only |> mutate("CI_per_thousand" = NVISITS/NMEMB *1000)
-by_month_regions_only |> ggplot(aes(x = MONTH, y = CI_per_thousand, group = part)) + 
-  geom_line(aes(color = part)) +
-  facet_wrap(~YEAR) + ggtitle("Steptococcal Pharyngitis Cases Incidence by Month \n All Ages, by Region") + labs(color = "Region") + ylab("Cases per 1,000 People") +scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT",
-                                                                                                                                   "OCT", "NOV", "DEC")) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+# by_month_regions_only |> ggplot(aes(x = MONTH, y = CI_per_thousand, group = part)) + 
+#   geom_line(aes(color = part)) +
+#   facet_wrap(~YEAR) + ggtitle("Steptococcal Pharyngitis Cases Incidence by Month \n All Ages, by Region") + labs(color = "Region") + ylab("Cases per 1,000 People") +scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT",
+#                                                                                                                                    "OCT", "NOV", "DEC")) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 
 
 ```
 
-We see that the West has fewer cases of streptococcal pharyngitis throughout the year, but the South tracks pretty well with the Northeast and Midwest through the beginning of the year, but cases rise earlier and higher starting at the end of the summer and into the fall. My analysis will seek to identify what factors drive this regional difference in case rates. 
-
-
-
-##Results
 As a first step in my analysis, I will do a descriptive analysis looking at case rates of streptococcal pharyngitis across states in the US over time. 
 ```{r, fig.width = 10,fig.height=10, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 #we now load in US mapping data from the maps package
@@ -188,6 +179,7 @@ us_strep_rates_over_time
 
 
 ```
+
 From this plot, we can see that that, across all age groups, cases of strep pharyngitis are much higher in states like Texas, Oklahoma, Mississippi, Tennessee and Kentucky have higher case rates, especially in more recent years (2016, 2017, 2018), and states in the Pacific Northwest such as California, Oregon, Washington, Montana and North Dakota, have lower case rates. 
 
 We can look at how case rates trend by age group over time.
@@ -211,6 +203,8 @@ us_strep_byage_map_gg <- us_base +
 
 us_strep_byage_map_gg + facet_grid(rows = vars(AGEGRP), cols = vars(YEAR) )
 ```
+
+
 From these plots, we can see that the cases of streptococcal pharyngitis are highest in the 5-9 year old age group, as previously explained, and that there are relatively few cases in the older age groups, but cases persist at a low level across the country in the older age groups. 
 
 How closely do these trends track with flu data? We can obtain the same data from MarketScan for flu data, using ICD codes: ICD9 4870, 4871, 7878, ICD10: J100, J101, J108, J110, J111, and J118. 
@@ -253,6 +247,7 @@ flu_by_month_regions_only |> ggplot(aes(x = MONTH, y = CI_per_thousand, group = 
 #need to figure out where data is missing 
 
 ```
+
 Here, we see similar regional trends play out, with a similar early fall divergence in the South compared to the other states. We could consider a situation in which people who have flu are more likely to get a secondary bacterial infection with streptococcus, or that the factors driving an increase in flu in the South are the same as the factors driving the increase in streptococcal pharyngitis. Will will consider flu cases in our statistical model of streptococcal pharyngitis cases. 
 
 If flu drives cases of streptococcal pharyngitis, it would also be useful to look at how trends in flu vaccination map to cases of streptococcal pharyngitis. We obtain flu vaccination from the CDC website FluVaxView [5]. 
@@ -302,6 +297,7 @@ us_base + geom_polygon(data = fluvax_map, aes(fill = as.numeric(`Estimate (%)`))
 
 fluvax_map$YEAR
 ```
+
 Here we see that flu vaccination rates are generally not especially high; ranging from 30-70% by November. Some states, especially in the Midwest, seem to have consistently higher flu vaccination than others, like Florida. 
 
 ```{r, fig.width = 10, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
@@ -371,7 +367,7 @@ fluvax_strep_59_plot
 
 ```
 
-Data on flu vaccination starts in a given year in July, and is collected through May, then restarts in July again. We can compare flu vaccination coverage to streptococcal pharyngitis cases in all ages (left) vs in just the 5-9 age group, which is the highest prevalence age group, as seen above. While in general, the Northeast has high rates of vaccination, and the other regions cluster pretty closely, there are a few examples of flu vaccination being lower in the South, particularly in the 2016-2017 and 2017-2018 flu seasons in all ages, although this does not seem to be the case in the 5-9 age group , where overall vaccination rates are generally higher.   
+Data on flu vaccination starts in a given year in July, and is collected through May, then restarts in July again. We can compare flu vaccination coverage to streptococcal pharyngitis cases in all ages vs in just the 5-9 age group, which is the highest prevalence age group, as seen above. While in general, the Northeast has high rates of vaccination, and the other regions cluster pretty closely, there are a few examples of flu vaccination being lower in the South, particularly in the 2016-2017 and 2017-2018 flu seasons in all ages, although this does not seem to be the case in the 5-9 age group , where overall vaccination rates are generally higher.   
 
 There is some evidence that the PCV vaccinate (against _Streptococcus pneumoniae_) can prevent early cases of otitis media, infection of the middle ear that can be caused by pneumococcus or other pathogens [6][7]. We are also interested in whether vaccination with PCV is protective against streptococcal pharyngitis. Data on PCV vaccination were obtained from CDC ChildVaxView [8]. The CDC currently recommends that children receive 4 doses of either PCV13 or PCV15 at 2 months, 4 months, 6 months, and 12-15 months old. Children who miss doses are recommended to follow catch-up guidelines to receive their vaccinations [9]. The CDC reports this vaccination data by birth cohort from 2011-2018. Here we use data on whether children received all 4 PCV vaccinations by the age of 35 months. We use the birth cohorts from 2011, 2012, and 2013 to compare to flu and streptococcal pharyngitis cases occurring in 2016, 2017, and 2018 in those in the 5-9 age group. 
 
@@ -396,6 +392,7 @@ pcv_over_time_4d35m
 
 
 ```
+
 These data show generally high vaccination (>75% universally), with some variation from year to year as to which states have the highest coverage. We can group these birth cohorts to plot onto our case count data from streptococcal pharyngitis and flu by including the 2011 birth cohort vaccination status for 5-9 year olds in the year 2016, 2011 and 2012 for 5-9 year olds in 2017, and 2011, 2012, and 2013 for 2018. 
 
 ```{r, fig.width = 10, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
@@ -456,160 +453,7 @@ grid.arrange(midwest, northeast, west, south, ncol = 2, nrow =2)
 ```
 PCV coverage is pretty high across the regions in these years, and no clear trends jump out ofthis visualization. However, there are some variations from year to year in both cases and vaccination. For example, PCV vaccination appears to increase in the West over these 3 years, and cases of streptococcal pharyngitis go down. 
 
-I will fit a number of models in order to better understand drivers of regional patterns of streptococcal pharyngitis. First, I will consider all years and all months, to look for a temporal trend. I will then add in covariates on flu cases and vaccination. I am using a linear model because my streptococcal pharyngitis cases are already reported as total counts for a given year, month, age, so we can assume that with large enough amounts of data, the errors will follow a normal distribution.
-
-```{r}
-joint4 <- flu_by_month_regions_only |> select(-NVISITS, -NMEMB, -CI_per_ten_thousand, -CI_per_hundred_thousand) |> mutate(Flu_CI_per_thousand = CI_per_thousand) |> select(-CI_per_thousand)
-strep_flu_vax_allages <- left_join(joint2,joint4) |> mutate(Strep_CI_per_thousand = CI_per_thousand) |> select(-CI_per_thousand, -Strep_CI_per_ten_thousand)
-
-linmod1 <- lm(Strep_CI_per_thousand ~ part,strep_flu_vax_allages)
-summary(linmod1)
-strep_flu_vax_allages |> mutate(pred = predict(linmod1, strep_flu_vax_allages)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2))
-#RMSE 9.969183e-16, R^2: 0.3375, adjusted R^2 0.3328
-#try adding in covariates
-
-#add year
-linmod2 <- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR), strep_flu_vax_allages)
-summary(linmod2) #RMSE 1.040379e-15; R^2 0.3955, Adjusted R^2 0.3797
-strep_flu_vax_allages |> mutate(pred = predict(linmod2, strep_flu_vax_allages)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2)) 
-
-#add month 
-linmod3 <- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH),strep_flu_vax_allages)
-summary(linmod3) #RMSE 1.345368e-15	 R^2 0.865, adjusted R^2 0.8578
-strep_flu_vax_allages |> mutate(pred = predict(linmod3, strep_flu_vax_allages)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2))  
-
-#adding in flu vaccination coverage
-linmod4 <- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage, strep_flu_vax_allages)
-summary(linmod4) #RMSE 2.252061e-15	  R^2 0.873, adjusted R^2 0.8654
-strep_flu_vax_allages_nojune <- strep_flu_vax_allages |> filter(MONTH != 6)
-strep_flu_vax_allages_nojune |> mutate(pred = predict(linmod4, strep_flu_vax_allages_nojune)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand, na.rm = TRUE)^2)) 
-
-#adding in flu CI as well
-linmod5 <- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand,strep_flu_vax_allages)
-summary(linmod5) #RMSE 1.86077e-15 R^2 0.8878, adjusted R^2 0.8807
-strep_flu_vax_allages_nojune |> mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand, na.rm = TRUE)^2)) 
-
-#try a month and year interaction term
-linmod6 <- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + as.factor(YEAR)*as.factor(MONTH),strep_flu_vax_allages)
-summary(linmod6) #R^2 0.9191, adjusted R-squared 0.8905
-
-#likelihood ratio test of full model with interactions vs without
-lrtest(linmod5, linmod6) #p value of 0.0004; this thinks the interaction term is better
-
-#now test full model against model with just region, year, and month in it
-#what other fit assessments should I do? 
-
-#plot the model data against the actual data
-strep_flu_vax_allages_nojune |> 
-  mutate(pred = predict(linmod6, strep_flu_vax_allages_nojune)) |>
-  pivot_longer(cols = c("Strep_CI_per_thousand", "pred")) |>
-  ggplot(aes(MONTH, value, color = part)) + 
-  geom_line(aes(linetype = name)) +
-  facet_wrap(~YEAR) +
-  scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
-  scale_linetype_discrete(name= "Value Plotted", labels = c("Predicted Strep Cases per 1000 People", "Observed Strep Cases per 1000 People")) + labs(color = "Region")
-
-```
-```{r}
-#now try to fit the model just for those 3 years that has the PCV data as well, just for 5-9 years old
-flu_by_month_regions_5 <- flu_by_month_regions |> filter(AGEGRP %in% c("05_09"))
-flu_by_month_regions_5_vis <- aggregate(NVISITS ~ part  + YEAR + MONTH, 
-                                       dat = flu_by_month_regions_5,
-                                       sum)
-flu_by_month_regions_5_memb <- aggregate(NMEMB ~ part  + YEAR + MONTH, 
-                                       dat = flu_by_month_regions_5,
-                                       sum)
-flu_by_month_regions_5 <- left_join(flu_by_month_regions_5_vis, flu_by_month_regions_5_memb)
-flu_by_month_regions_5 <- flu_by_month_regions_5 |> 
-  mutate("Flu_CI_per_thousand" = NVISITS/NMEMB *1000) |> 
-  select(-NVISITS, -NMEMB)
-#need to get flu_vax data just for 5-9 age group
-#joint3 has flu coverage and strep data
-strep_flu_vax_pcv_59 <- left_join(joint3, flu_by_month_regions_5) |> 
-  left_join(strep_pcv) |> 
-  filter(YEAR %in% c(2016, 2017, 2018)) |> 
-  mutate(Strep_CI_per_thousand = CI_per_thousand) |>
-  select(-CI_per_thousand, -Strep_CI_per_ten_thousand, -Strep_CI_per_five_thousand, -Strep_CI_per_two_thousand, -Strep_CI_per_five_hundred)
-#do same model fit process
-pcv_mod1 <- lm(Strep_CI_per_thousand ~part, strep_flu_vax_pcv_59)
-summary(pcv_mod1) #R^2 0.3098, adjusted R^2 0.295
-
-#add year
-pcv_mod2 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR), strep_flu_vax_pcv_59)
-summary(pcv_mod2) #R^2 0.3169, adjusted R^20.2922
-
-#add month
-pcv_mod3 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH), strep_flu_vax_pcv_59)
-summary(pcv_mod3) #R^2 0.8539, adjusted R^2 0.8355
-
-
-#add flu_coverage 
-pcv_mod4 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage, strep_flu_vax_pcv_59)
-summary(pcv_mod4) #R^2 is 0.8721, adjusted R^2 0.8544
-
-#add flu cases
-pcv_mod5 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand, strep_flu_vax_pcv_59)
-summary(pcv_mod5) #R^2 0.8983, adjusted R^2 0.8831
-
-#add pcv coverage
-pcv_mod6 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage, strep_flu_vax_pcv_59)
-summary(pcv_mod6) #R^2 0.8991, adjusted R^2 0.883; pretty much no change
-
-#likelihood ratio test of adding vs not adding PCV coverage
-lrtest(pcv_mod5, pcv_mod6) #p-value is 0.3039; no benefit to adding PCV coverage
-
-pcv_mod7 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage + as.factor(YEAR)*as.factor(MONTH), strep_flu_vax_pcv_59)
-summary(pcv_mod7) #R^2 0.9156, adjusted R^2 0.8811
-
-lrtest(pcv_mod6, pcv_mod7) #p-value for interaction vs no interaction is 0.2646; not significant
-#so best model does not even include PCV vaccination? but will just quickly show it with 
-
-strep_flu_vax_pcv_59_nojune <- strep_flu_vax_pcv_59 |> 
-  filter(MONTH != 6) 
-strep_flu_vax_pcv_59_nojune |> 
-  mutate(pred = predict(pcv_mod7, strep_flu_vax_pcv_59_nojune)) |>
-  pivot_longer(cols = c("Strep_CI_per_thousand", "pred")) |> 
-  ggplot(aes(MONTH, value, color = part)) + 
-  geom_line(aes(linetype = name)) +
-  facet_wrap(~YEAR) +
-  scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) + 
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
-  scale_linetype_discrete(name= "Value Plotted", labels = c("Predicted Strep Cases per 1000 People", "Observed Strep Cases per 1000 People")) + labs(color = "Region")
-  
-
-```
-
-
-
-##Conclusions
-
-
-
 ##Appendix
 ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
 
 ```
-
-##References
-1.	Ellen R Wald. Group A streptococcal tonsillopharyngitis in children and adolescents: Clinical features and diagnosis. https://www.uptodate.com/contents/group-a-streptococcal-tonsillopharyngitis-in-children-and-adolescents-clinical-features-and-diagnosis/print?search=strep.
-2.	Bisno, A. L. Acute Pharyngitis: Etiology and Diagnosis. Pediatrics 97, 949–954 (1996).
-3.	Luo, R. et al. Diagnosis and Management of Group a Streptococcal Pharyngitis in the United States, 2011–2015. BMC Infect Dis 19, 193 (2019).
-4.	Weekly U.S. Influenza Surveillance Report | CDC. https://www.cdc.gov/flu/weekly/index.htm.
-5.	FluVaxView | FluVaxView | Seasonal Influenza (Flu) | CDC. https://www.cdc.gov/flu/fluvaxview/index.htm (2022).
-6.	Ron Dagan, Stephen Pelton, Lauren Bakaletz, & Robert Cohen. Prevention of early episodes of otitis media by pneumococcal vaccines might reduce progression to complex disease. The Lancet Infectious Diseases 16,.
-7.	Ben-Shimol, S. et al. Impact of Widespread Introduction of Pneumococcal Conjugate Vaccines on Pneumococcal and Nonpneumococcal Otitis Media. Clinical Infectious Diseases 63, 611–618 (2016).
-8.	ChildVaxView | CDC. https://www.cdc.gov/vaccines/imz-managers/coverage/childvaxview/index.html (2022).
-9.	Pneumococcal Vaccine Recommendations | CDC. https://www.cdc.gov/vaccines/vpd/pneumo/hcp/recommendations.html (2022).
-
-
-
-
-
-
-
-
-
-
-
-

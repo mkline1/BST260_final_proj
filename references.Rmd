@@ -1,0 +1,27 @@
+---
+title: "references"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+<html>
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+   <ol type="1">
+      <li>Ellen R Wald. Group A streptococcal tonsillopharyngitis in children and adolescents: Clinical features and diagnosis. https://www.uptodate.com/contents/group-a-streptococcal-tonsillopharyngitis-in-children-and-adolescents-clinical-features-and-diagnosis/print?search=strep.</li>
+      <li>Bisno, A. L. Acute Pharyngitis: Etiology and Diagnosis. Pediatrics 97, 949–954 (1996).</li>
+      <li>Luo, R. et al. Diagnosis and Management of Group a Streptococcal Pharyngitis in the United States, 2011–2015. BMC Infect Dis 19, 193 (2019).</li>
+      <li>Weekly U.S. Influenza Surveillance Report | CDC. https://www.cdc.gov/flu/weekly/index.htm.</li>
+      <li>FluVaxView | FluVaxView | Seasonal Influenza (Flu) | CDC. https://www.cdc.gov/flu/fluvaxview/index.htm (2022).</li>
+      <li>Ron Dagan, Stephen Pelton, Lauren Bakaletz, & Robert Cohen. Prevention of early episodes of otitis media by pneumococcal vaccines might reduce progression to complex disease. The Lancet Infectious Diseases 16,. </li>
+      <li>Ben-Shimol, S. et al. Impact of Widespread Introduction of Pneumococcal Conjugate Vaccines on Pneumococcal and Nonpneumococcal Otitis Media. Clinical Infectious Diseases 63, 611–618 (2016). </li>
+      <li>ChildVaxView | CDC. https://www.cdc.gov/vaccines/imz-managers/coverage/childvaxview/index.html (2022).</li>
+      <li>Pneumococcal Vaccine Recommendations | CDC. https://www.cdc.gov/vaccines/vpd/pneumo/hcp/recommendations.html (2022).</li>
+   </ol>
+</body>
+</html>
