@@ -350,7 +350,7 @@ Here we see that flu vaccination rates are generally not especially
 high; ranging from 30-70% by November. Some states, especially in the
 Midwest, seem to have consistently higher flu vaccination than others,
 like Florida.</p>
-<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="960" /></p>
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="960" /><img src="index_files/figure-html/unnamed-chunk-9-2.png" width="960" /></p>
 <p>Data on flu vaccination starts in a given year in July, and is
 collected through May, then restarts in July again. We can compare flu
 vaccination coverage to streptococcal pharyngitis cases in all ages
@@ -1543,7 +1543,8 @@ fluvax_strep_59_plot &lt;- joint3_pivot |&gt; ggplot(aes(x= MONTH, y = value, co
   facet_wrap(~YEAR) + scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;,
                                                                                                                                    &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ggtitle(&quot;Strep Pharyngitis Rates and Flu Vaccination Over Time  \n 5-9 Age Group&quot;) + labs(linetype = &quot;Value Plotted&quot;) + labs(color = &quot;Region&quot;) + scale_linetype_discrete(labels = c(&quot;Flu Vaccination %&quot;, &quot;Strep cases per 2,000&quot;))
 
-grid.arrange(fluvax_strep_allages_plot,fluvax_strep_59_plot, nrow =2)
+fluvax_strep_allages_plot
+fluvax_strep_59_plot
 
 
 childvax_data &lt;- read_csv(&quot;/Users/madeleinekline/Dropbox (Harvard University)/G1/GradLab/vax_data/Vaccination_Coverage_among_Young_Children__0-35_Months_.csv&quot;)
