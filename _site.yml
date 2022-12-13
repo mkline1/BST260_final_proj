@@ -8,7 +8,7 @@ navbar:
       icon: fa-home
       href: index.html
     - text: "Mapping"
-      href: Napping.html
+      href: Mapping.html
     - text: "Models"
       href: Models.html
     - text: "Conclusions"
