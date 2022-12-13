@@ -1,6 +1,5 @@
 ---
 title: "Models"
-author: "Maddy Kline"
 
 ---
 
@@ -553,7 +552,7 @@ strep_flu_vax_pcv_59_nojune |>
 ```
 
 
-##Appendix
+## Appendix
 ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
 
 ```

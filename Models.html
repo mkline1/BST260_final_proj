@@ -9,7 +9,6 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Maddy Kline" />
 
 
 <title>Models</title>
@@ -246,11 +245,7 @@ $(document).ready(function () {
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="index.html">
-    <span class="fa fa-home"></span>
-     
-    Introduction
-  </a>
+  <a href="index.html">Introduction</a>
 </li>
 <li>
   <a href="Mapping.html">Mapping</a>
@@ -290,7 +285,6 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">Models</h1>
-<h4 class="author">Maddy Kline</h4>
 
 </div>
 
@@ -1108,7 +1102,8 @@ summary(pcv_mod7) #R^2 0.9156, adjusted R^2 0.8811</code></pre>
 ## 2  40 -275.26 20 23.507     0.2646</code></pre>
 <pre class="r"><code>#so best model does not even include PCV vaccination? but will just quickly show it with </code></pre>
 <p><img src="Models_files/figure-html/unnamed-chunk-15-1.png" width="960" /></p>
-<p>##Appendix</p>
+<div id="appendix" class="section level2">
+<h2>Appendix</h2>
 <pre class="r"><code>knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(stringr)
@@ -1611,6 +1606,7 @@ strep_flu_vax_pcv_59_nojune |&gt;
   scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;, &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
   scale_linetype_discrete(name= &quot;Value Plotted&quot;, labels = c(&quot;Predicted Strep Cases per 1000 People&quot;, &quot;Observed Strep Cases per 1000 People&quot;)) + labs(color = &quot;Region&quot;)</code></pre>
+</div>
 
 
 

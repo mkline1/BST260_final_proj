@@ -1,6 +1,6 @@
 ---
 title: "Mapping"
-author: "Maddy Kline"
+
 ---
 
 ```{r setup, include=FALSE}
@@ -453,7 +453,7 @@ grid.arrange(midwest, northeast, west, south, ncol = 2, nrow =2)
 ```
 PCV coverage is pretty high across the regions in these years, and no clear trends jump out ofthis visualization. However, there are some variations from year to year in both cases and vaccination. For example, PCV vaccination appears to increase in the West over these 3 years, and cases of streptococcal pharyngitis go down. 
 
-##Appendix
+## Appendix
 ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}
 
 ```

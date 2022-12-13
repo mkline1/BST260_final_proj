@@ -1,6 +1,5 @@
 ---
 title: "conclusions"
-author: "Maddy Kline"
 ---
 
 ```{r setup, include=FALSE}
