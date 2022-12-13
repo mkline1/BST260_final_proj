@@ -15,3 +15,7 @@ navbar:
       href: conclusions.html
     - text: "References"
       href: references.html
+output:
+  html_document:
+    theme: cosmo
+    highlight: textmate
