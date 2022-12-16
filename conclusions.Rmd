@@ -1,9 +1,11 @@
 ---
-title: "conclusions"
+title: "Conclusions"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-I will write my conclusions here!
+My analyses show regional trends in cases of streptococcal pharyngitis over the course of the year. In the West, cases of streptococcal pharyngitis are lower throughout the year than in the three other regions. In the South, cases are higher, and they are higher specifically starting at the end of the summer and into the early fall. Flu cases so similar but not identical trends; the South shows a similar pattern of increased divergence from the other regions starting at the end of the summer into the fall, but not to the same extent as the streptococcal pharyngitis cases. Additionally, the West does not show a similar lack of cases of flu; its pattern follows closely with the Northeast and Midwest. Flu cases and flu vaccination are mildly correlated with streptococcal pharyngitis cases, but PCV vaccination does not seem to trend with streptococcal pharyngitis cases. The linear model that I fit was able to predict trends reasonably well, although there is some room for improvement especially in the West.
+
+Many open questions remain. Are the trends seen in this analysis unique to streptococcal pharyngitis? If so, what factors could explain it? Are there more specific states of geographic regions that are driving this trends? Given more time, it would be useful to account for other variables, including weather. It would also be useful to look at more diseases of the upper respiratory system, for example, RSV, parainfluenza, etc, as well as diseases that spread in a similar age group but are not respiratory, such as impetigo or gastroenteritis. Given that we've seen a massive change in the landscape of respiratory illnesses in the time since these data were collected with the emergence of COVID-19, and now a tri-demic of RSV, flu, and COVID-19, it would be interesting to see whether our understanding of the drivers of streptococcal pharyngitis continue to hold up in the present day. 

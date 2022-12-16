@@ -14,14 +14,8 @@ navbar:
       href: conclusions.html
     - text: "References"
       href: references.html
-  right:
-    - text: "Contact me"
-      icon: fa-envelope-o
-      href: mailto:madeleine_kline@g.harvard.edu
-    - text: "Github"
-      icon: fa-github
-      href: https://github.com/mkline1
+      
 output:
   html_document:
-    theme: cosmo
+    theme: yeti
     highlight: textmate

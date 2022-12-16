@@ -16,7 +16,7 @@
 <script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -32,8 +32,6 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -261,20 +259,7 @@ $(document).ready(function () {
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li>
-  <a href="mailto:madeleine_kline@g.harvard.edu">
-    <span class="fa fa-envelope-o"></span>
-     
-    Contact me
-  </a>
-</li>
-<li>
-  <a href="https://github.com/mkline1">
-    <span class="fa fa-github"></span>
-     
-    Github
-  </a>
-</li>
+        
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -289,819 +274,98 @@ $(document).ready(function () {
 </div>
 
 
-<p>I will fit a number of models in order to better understand drivers
-of regional patterns of streptococcal pharyngitis. First, I will
-consider all years and all months, to look for a temporal trend. I will
-then add in covariates on flu cases and vaccination. I am using a linear
-model because my streptococcal pharyngitis cases are already reported as
-total counts for a given year, month, age, so we can assume that with
+<p>I will fit a model to better understand drivers of regional patterns
+of streptococcal pharyngitis. I will first consider all age groups
+across all years of data (2010-2018), and with possible covariates
+region, year, month, flu vaccination (monthly), and flu cases. I am
+using a linear regression model because streptococcal pharyngitis cases
+are already reported as total counts for a given year and month, so with
 large enough amounts of data, the errors will follow a normal
-distribution.</p>
-<pre class="r"><code>joint4 &lt;- flu_by_month_regions_only |&gt; select(-NVISITS, -NMEMB, -CI_per_ten_thousand, -CI_per_hundred_thousand) |&gt; mutate(Flu_CI_per_thousand = CI_per_thousand) |&gt; select(-CI_per_thousand)
-strep_flu_vax_allages &lt;- left_join(joint2,joint4) |&gt; mutate(Strep_CI_per_thousand = CI_per_thousand) |&gt; select(-CI_per_thousand, -Strep_CI_per_ten_thousand)</code></pre>
-<pre><code>## Joining, by = c(&quot;part&quot;, &quot;YEAR&quot;, &quot;MONTH&quot;)</code></pre>
-<pre class="r"><code>linmod1 &lt;- lm(Strep_CI_per_thousand ~ part,strep_flu_vax_allages)
-summary(linmod1)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part, data = strep_flu_vax_allages)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -1.65563 -0.56534 -0.00754  0.46248  2.61101 
-## 
-## Coefficients:
-##               Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)    2.36347    0.07641  30.932  &lt; 2e-16 ***
-## partnortheast  0.04424    0.10806   0.409    0.682    
-## partsouth      0.66290    0.10806   6.135 1.95e-09 ***
-## partwest      -0.91792    0.10806  -8.495 3.32e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.7941 on 428 degrees of freedom
-## Multiple R-squared:  0.3375, Adjusted R-squared:  0.3328 
-## F-statistic: 72.67 on 3 and 428 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>strep_flu_vax_allages |&gt; mutate(pred = predict(linmod1, strep_flu_vax_allages)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2))</code></pre>
-<pre><code>##           RMSE
-## 1 9.969183e-16</code></pre>
-<pre class="r"><code>#RMSE 9.969183e-16, R^2: 0.3375, adjusted R^2 0.3328
-#try adding in covariates
-
-#add year
-linmod2 &lt;- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR), strep_flu_vax_allages)
-summary(linmod2) #RMSE 1.040379e-15; R^2 0.3955, Adjusted R^2 0.3797</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part + as.factor(YEAR), 
-##     data = strep_flu_vax_allages)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -1.64156 -0.57117  0.04287  0.47196  2.40249 
-## 
-## Coefficients:
-##                     Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)          2.22631    0.12762  17.446  &lt; 2e-16 ***
-## partnortheast        0.04424    0.10420   0.425  0.67137    
-## partsouth            0.66290    0.10420   6.362 5.21e-10 ***
-## partwest            -0.91792    0.10420  -8.809  &lt; 2e-16 ***
-## as.factor(YEAR)2011  0.34568    0.15630   2.212  0.02753 *  
-## as.factor(YEAR)2012 -0.10334    0.15630  -0.661  0.50885    
-## as.factor(YEAR)2013 -0.24430    0.15630  -1.563  0.11880    
-## as.factor(YEAR)2014 -0.02084    0.15630  -0.133  0.89397    
-## as.factor(YEAR)2015  0.15692    0.15630   1.004  0.31596    
-## as.factor(YEAR)2016  0.40477    0.15630   2.590  0.00994 ** 
-## as.factor(YEAR)2017  0.49114    0.15630   3.142  0.00179 ** 
-## as.factor(YEAR)2018  0.20437    0.15630   1.308  0.19173    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.7657 on 420 degrees of freedom
-## Multiple R-squared:  0.3955, Adjusted R-squared:  0.3797 
-## F-statistic: 24.98 on 11 and 420 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>strep_flu_vax_allages |&gt; mutate(pred = predict(linmod2, strep_flu_vax_allages)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2)) </code></pre>
-<pre><code>##           RMSE
-## 1 1.040379e-15</code></pre>
-<pre class="r"><code>#add month 
-linmod3 &lt;- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH),strep_flu_vax_allages)
-summary(linmod3) #RMSE 1.345368e-15  R^2 0.865, adjusted R^2 0.8578</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part + as.factor(YEAR) + 
-##     as.factor(MONTH), data = strep_flu_vax_allages)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -0.84857 -0.22221 -0.03956  0.21749  1.33461 
-## 
-## Coefficients:
-##                     Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)          2.74207    0.08460  32.413  &lt; 2e-16 ***
-## partnortheast        0.04424    0.04989   0.887  0.37578    
-## partsouth            0.66290    0.04989  13.287  &lt; 2e-16 ***
-## partwest            -0.91792    0.04989 -18.398  &lt; 2e-16 ***
-## as.factor(YEAR)2011  0.34568    0.07484   4.619 5.17e-06 ***
-## as.factor(YEAR)2012 -0.10334    0.07484  -1.381  0.16807    
-## as.factor(YEAR)2013 -0.24430    0.07484  -3.264  0.00119 ** 
-## as.factor(YEAR)2014 -0.02084    0.07484  -0.279  0.78075    
-## as.factor(YEAR)2015  0.15692    0.07484   2.097  0.03663 *  
-## as.factor(YEAR)2016  0.40477    0.07484   5.409 1.08e-07 ***
-## as.factor(YEAR)2017  0.49114    0.07484   6.563 1.60e-10 ***
-## as.factor(YEAR)2018  0.20437    0.07484   2.731  0.00659 ** 
-## as.factor(MONTH)2    0.36148    0.08642   4.183 3.52e-05 ***
-## as.factor(MONTH)3    0.55212    0.08642   6.389 4.55e-10 ***
-## as.factor(MONTH)4   -0.09788    0.08642  -1.133  0.25802    
-## as.factor(MONTH)5   -0.20374    0.08642  -2.358  0.01886 *  
-## as.factor(MONTH)6   -1.01403    0.08642 -11.734  &lt; 2e-16 ***
-## as.factor(MONTH)7   -1.50414    0.08642 -17.406  &lt; 2e-16 ***
-## as.factor(MONTH)8   -1.47565    0.08642 -17.076  &lt; 2e-16 ***
-## as.factor(MONTH)9   -1.19162    0.08642 -13.789  &lt; 2e-16 ***
-## as.factor(MONTH)10  -0.87726    0.08642 -10.152  &lt; 2e-16 ***
-## as.factor(MONTH)11  -0.57884    0.08642  -6.698 6.99e-11 ***
-## as.factor(MONTH)12  -0.15952    0.08642  -1.846  0.06562 .  
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.3666 on 409 degrees of freedom
-## Multiple R-squared:  0.865,  Adjusted R-squared:  0.8578 
-## F-statistic: 119.2 on 22 and 409 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>strep_flu_vax_allages |&gt; mutate(pred = predict(linmod3, strep_flu_vax_allages)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2))  </code></pre>
-<pre><code>##           RMSE
-## 1 1.345368e-15</code></pre>
-<pre class="r"><code>#adding in flu vaccination coverage
-linmod4 &lt;- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage, strep_flu_vax_allages)
-summary(linmod4) #RMSE 2.252061e-15   R^2 0.873, adjusted R^2 0.8654</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part + as.factor(YEAR) + 
-##     as.factor(MONTH) + flu_coverage, data = strep_flu_vax_allages)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -0.90610 -0.20920 -0.04195  0.20336  1.28708 
-## 
-## Coefficients:
-##                      Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)          1.890275   0.233451   8.097 8.50e-15 ***
-## partnortheast       -0.044889   0.053839  -0.834 0.404966    
-## partsouth            0.695330   0.052186  13.324  &lt; 2e-16 ***
-## partwest            -0.915061   0.053830 -16.999  &lt; 2e-16 ***
-## as.factor(YEAR)2011  0.345045   0.082101   4.203 3.32e-05 ***
-## as.factor(YEAR)2012 -0.134378   0.080314  -1.673 0.095151 .  
-## as.factor(YEAR)2013 -0.316777   0.082157  -3.856 0.000136 ***
-## as.factor(YEAR)2014 -0.058882   0.080232  -0.734 0.463485    
-## as.factor(YEAR)2015  0.042019   0.084112   0.500 0.617685    
-## as.factor(YEAR)2016  0.319786   0.083085   3.849 0.000140 ***
-## as.factor(YEAR)2017  0.422531   0.082257   5.137 4.56e-07 ***
-## as.factor(YEAR)2018  0.149792   0.081422   1.840 0.066624 .  
-## as.factor(MONTH)2    0.326929   0.086090   3.798 0.000171 ***
-## as.factor(MONTH)3    0.500453   0.086636   5.777 1.63e-08 ***
-## as.factor(MONTH)4   -0.160344   0.087089  -1.841 0.066411 .  
-## as.factor(MONTH)5   -0.272347   0.087384  -3.117 0.001974 ** 
-## as.factor(MONTH)7   -0.550812   0.249448  -2.208 0.027857 *  
-## as.factor(MONTH)8   -0.607732   0.235540  -2.580 0.010265 *  
-## as.factor(MONTH)9   -0.484704   0.198176  -2.446 0.014924 *  
-## as.factor(MONTH)10  -0.563330   0.116764  -4.825 2.07e-06 ***
-## as.factor(MONTH)11  -0.478603   0.089316  -5.359 1.49e-07 ***
-## as.factor(MONTH)12  -0.121000   0.086197  -1.404 0.161240    
-## flu_coverage         0.022859   0.005779   3.956 9.17e-05 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.3634 on 365 degrees of freedom
-##   (44 observations deleted due to missingness)
-## Multiple R-squared:  0.873,  Adjusted R-squared:  0.8654 
-## F-statistic: 114.1 on 22 and 365 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>strep_flu_vax_allages_nojune &lt;- strep_flu_vax_allages |&gt; filter(MONTH != 6)
-strep_flu_vax_allages_nojune |&gt; mutate(pred = predict(linmod4, strep_flu_vax_allages_nojune)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand, na.rm = TRUE)^2)) </code></pre>
-<pre><code>##           RMSE
-## 1 2.252061e-15</code></pre>
-<pre class="r"><code>#adding in flu CI as well
-linmod5 &lt;- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand,strep_flu_vax_allages)
-summary(linmod5) #RMSE 1.86077e-15 R^2 0.8878, adjusted R^2 0.8807</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part + as.factor(YEAR) + 
-##     as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand, data = strep_flu_vax_allages)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -0.80355 -0.23108 -0.03576  0.21025  1.27994 
-## 
-## Coefficients:
-##                      Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)          1.728584   0.220978   7.822 5.67e-14 ***
-## partnortheast       -0.044293   0.050678  -0.874 0.382690    
-## partsouth            0.610911   0.050611  12.071  &lt; 2e-16 ***
-## partwest            -0.903844   0.050695 -17.829  &lt; 2e-16 ***
-## as.factor(YEAR)2011  0.302584   0.077523   3.903 0.000113 ***
-## as.factor(YEAR)2012 -0.173641   0.075810  -2.290 0.022564 *  
-## as.factor(YEAR)2013 -0.400015   0.078261  -5.111 5.18e-07 ***
-## as.factor(YEAR)2014 -0.144946   0.076536  -1.894 0.059041 .  
-## as.factor(YEAR)2015 -0.018876   0.079659  -0.237 0.812817    
-## as.factor(YEAR)2016  0.268352   0.078558   3.416 0.000707 ***
-## as.factor(YEAR)2017  0.319501   0.078843   4.052 6.20e-05 ***
-## as.factor(YEAR)2018 -0.020557   0.080491  -0.255 0.798557    
-## as.factor(MONTH)2    0.354293   0.081130   4.367 1.64e-05 ***
-## as.factor(MONTH)3    0.619944   0.083353   7.438 7.43e-13 ***
-## as.factor(MONTH)4    0.060588   0.087963   0.689 0.491394    
-## as.factor(MONTH)5   -0.009920   0.090561  -0.110 0.912839    
-## as.factor(MONTH)7   -0.290966   0.237778  -1.224 0.221862    
-## as.factor(MONTH)8   -0.361666   0.224537  -1.611 0.108108    
-## as.factor(MONTH)9   -0.238829   0.189887  -1.258 0.209290    
-## as.factor(MONTH)10  -0.313726   0.115665  -2.712 0.006998 ** 
-## as.factor(MONTH)11  -0.240972   0.090803  -2.654 0.008308 ** 
-## as.factor(MONTH)12  -0.016496   0.082527  -0.200 0.841683    
-## flu_coverage         0.022102   0.005441   4.062 5.95e-05 ***
-## Flu_CI_per_thousand  0.082167   0.011864   6.926 1.97e-11 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.342 on 364 degrees of freedom
-##   (44 observations deleted due to missingness)
-## Multiple R-squared:  0.8878, Adjusted R-squared:  0.8807 
-## F-statistic: 125.3 on 23 and 364 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>strep_flu_vax_allages_nojune |&gt; mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand, na.rm = TRUE)^2)) </code></pre>
-<pre><code>##          RMSE
-## 1 1.86077e-15</code></pre>
-<pre class="r"><code>#try a month and year interaction term
-linmod6 &lt;- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + as.factor(YEAR)*as.factor(MONTH),strep_flu_vax_allages)
-summary(linmod6) #R^2 0.9191, adjusted R-squared 0.8905</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part + as.factor(YEAR) + 
-##     as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + as.factor(YEAR) * 
-##     as.factor(MONTH), data = strep_flu_vax_allages)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -1.06179 -0.17758 -0.00135  0.18555  0.87743 
-## 
-## Coefficients: (2 not defined because of singularities)
-##                                         Estimate Std. Error t value Pr(&gt;|t|)
-## (Intercept)                             1.543248   0.276599   5.579 5.60e-08
-## partnortheast                          -0.040916   0.049130  -0.833 0.405644
-## partsouth                               0.588731   0.050960  11.553  &lt; 2e-16
-## partwest                               -0.904142   0.049217 -18.371  &lt; 2e-16
-## as.factor(YEAR)2011                     0.962687   0.235682   4.085 5.74e-05
-## as.factor(YEAR)2012                     0.327427   0.232651   1.407 0.160402
-## as.factor(YEAR)2013                    -0.422083   0.252258  -1.673 0.095377
-## as.factor(YEAR)2014                    -0.235606   0.239988  -0.982 0.327057
-## as.factor(YEAR)2015                    -0.157326   0.251235  -0.626 0.531678
-## as.factor(YEAR)2016                     0.406794   0.234764   1.733 0.084213
-## as.factor(YEAR)2017                     0.760760   0.239004   3.183 0.001618
-## as.factor(YEAR)2018                     0.120924   0.291078   0.415 0.678134
-## as.factor(MONTH)2                       0.330922   0.231964   1.427 0.154784
-## as.factor(MONTH)3                       0.923072   0.232218   3.975 8.92e-05
-## as.factor(MONTH)4                       0.272326   0.232485   1.171 0.242425
-## as.factor(MONTH)5                       0.249307   0.232614   1.072 0.284730
-## as.factor(MONTH)7                      -0.202633   0.378497  -0.535 0.592815
-## as.factor(MONTH)8                      -0.280827   0.314686  -0.892 0.372926
-## as.factor(MONTH)9                      -0.115880   0.290283  -0.399 0.690046
-## as.factor(MONTH)10                     -0.084947   0.242100  -0.351 0.725941
-## as.factor(MONTH)11                      0.227960   0.231935   0.983 0.326506
-## as.factor(MONTH)12                      0.624044   0.232110   2.689 0.007597
-## flu_coverage                            0.020504   0.006138   3.340 0.000948
-## Flu_CI_per_thousand                     0.103514   0.019039   5.437 1.16e-07
-## as.factor(YEAR)2011:as.factor(MONTH)2   0.030065   0.328871   0.091 0.927225
-## as.factor(YEAR)2012:as.factor(MONTH)2   0.042104   0.327878   0.128 0.897911
-## as.factor(YEAR)2013:as.factor(MONTH)2   0.066381   0.331846   0.200 0.841595
-## as.factor(YEAR)2014:as.factor(MONTH)2   0.122087   0.330382   0.370 0.712003
-## as.factor(YEAR)2015:as.factor(MONTH)2  -0.008194   0.330470  -0.025 0.980235
-## as.factor(YEAR)2016:as.factor(MONTH)2   0.184194   0.329381   0.559 0.576454
-## as.factor(YEAR)2017:as.factor(MONTH)2  -0.034383   0.330072  -0.104 0.917108
-## as.factor(YEAR)2018:as.factor(MONTH)2  -0.108867   0.328107  -0.332 0.740280
-## as.factor(YEAR)2011:as.factor(MONTH)3  -0.340879   0.328065  -1.039 0.299654
-## as.factor(YEAR)2012:as.factor(MONTH)3  -0.759420   0.328350  -2.313 0.021442
-## as.factor(YEAR)2013:as.factor(MONTH)3  -0.223987   0.334613  -0.669 0.503785
-## as.factor(YEAR)2014:as.factor(MONTH)3   0.179191   0.332005   0.540 0.589808
-## as.factor(YEAR)2015:as.factor(MONTH)3  -0.019702   0.332825  -0.059 0.952837
-## as.factor(YEAR)2016:as.factor(MONTH)3  -0.396736   0.333285  -1.190 0.234884
-## as.factor(YEAR)2017:as.factor(MONTH)3  -0.365106   0.328063  -1.113 0.266679
-## as.factor(YEAR)2018:as.factor(MONTH)3  -0.493602   0.352168  -1.402 0.162117
-## as.factor(YEAR)2011:as.factor(MONTH)4  -0.541251   0.329375  -1.643 0.101427
-## as.factor(YEAR)2012:as.factor(MONTH)4  -0.656282   0.327923  -2.001 0.046301
-## as.factor(YEAR)2013:as.factor(MONTH)4   0.020070   0.338584   0.059 0.952773
-## as.factor(YEAR)2014:as.factor(MONTH)4   0.315148   0.331684   0.950 0.342841
-## as.factor(YEAR)2015:as.factor(MONTH)4   0.231238   0.335678   0.689 0.491464
-## as.factor(YEAR)2016:as.factor(MONTH)4  -0.145758   0.328598  -0.444 0.657685
-## as.factor(YEAR)2017:as.factor(MONTH)4  -0.447447   0.328344  -1.363 0.174037
-## as.factor(YEAR)2018:as.factor(MONTH)4  -0.130290   0.364199  -0.358 0.720799
-## as.factor(YEAR)2011:as.factor(MONTH)5  -0.726542   0.329607  -2.204 0.028302
-## as.factor(YEAR)2012:as.factor(MONTH)5  -0.594764   0.327831  -1.814 0.070689
-## as.factor(YEAR)2013:as.factor(MONTH)5  -0.087772   0.340570  -0.258 0.796807
-## as.factor(YEAR)2014:as.factor(MONTH)5   0.169968   0.332962   0.510 0.610115
-## as.factor(YEAR)2015:as.factor(MONTH)5   0.130982   0.337530   0.388 0.698260
-## as.factor(YEAR)2016:as.factor(MONTH)5  -0.029042   0.327821  -0.089 0.929470
-## as.factor(YEAR)2017:as.factor(MONTH)5  -0.365097   0.329659  -1.107 0.269010
-## as.factor(YEAR)2018:as.factor(MONTH)5  -0.179294   0.370262  -0.484 0.628590
-## as.factor(YEAR)2011:as.factor(MONTH)7         NA         NA      NA       NA
-## as.factor(YEAR)2012:as.factor(MONTH)7  -0.388897   0.374169  -1.039 0.299514
-## as.factor(YEAR)2013:as.factor(MONTH)7   0.267329   0.338453   0.790 0.430266
-## as.factor(YEAR)2014:as.factor(MONTH)7   0.258901   0.346935   0.746 0.456128
-## as.factor(YEAR)2015:as.factor(MONTH)7   0.369849   0.342179   1.081 0.280668
-## as.factor(YEAR)2016:as.factor(MONTH)7  -0.205075   0.372297  -0.551 0.582176
-## as.factor(YEAR)2017:as.factor(MONTH)7  -0.564943   0.355741  -1.588 0.113375
-## as.factor(YEAR)2018:as.factor(MONTH)7         NA         NA      NA       NA
-## as.factor(YEAR)2011:as.factor(MONTH)8  -0.818716   0.330377  -2.478 0.013785
-## as.factor(YEAR)2012:as.factor(MONTH)8  -0.315942   0.328075  -0.963 0.336353
-## as.factor(YEAR)2013:as.factor(MONTH)8   0.292764   0.341963   0.856 0.392644
-## as.factor(YEAR)2014:as.factor(MONTH)8   0.250186   0.333616   0.750 0.453918
-## as.factor(YEAR)2015:as.factor(MONTH)8   0.363768   0.341021   1.067 0.287005
-## as.factor(YEAR)2016:as.factor(MONTH)8  -0.063651   0.329102  -0.193 0.846777
-## as.factor(YEAR)2017:as.factor(MONTH)8  -0.432153   0.332135  -1.301 0.194259
-## as.factor(YEAR)2018:as.factor(MONTH)8   0.092494   0.371887   0.249 0.803759
-## as.factor(YEAR)2011:as.factor(MONTH)9  -0.812559   0.330161  -2.461 0.014442
-## as.factor(YEAR)2012:as.factor(MONTH)9  -0.388693   0.327974  -1.185 0.236948
-## as.factor(YEAR)2013:as.factor(MONTH)9   0.227723   0.341399   0.667 0.505291
-## as.factor(YEAR)2014:as.factor(MONTH)9   0.287408   0.333616   0.861 0.389687
-## as.factor(YEAR)2015:as.factor(MONTH)9   0.400440   0.340522   1.176 0.240589
-## as.factor(YEAR)2016:as.factor(MONTH)9  -0.094366   0.328422  -0.287 0.774066
-## as.factor(YEAR)2017:as.factor(MONTH)9  -0.521589   0.331606  -1.573 0.116843
-## as.factor(YEAR)2018:as.factor(MONTH)9  -0.020189   0.371482  -0.054 0.956696
-## as.factor(YEAR)2011:as.factor(MONTH)10 -0.882328   0.330346  -2.671 0.007998
-## as.factor(YEAR)2012:as.factor(MONTH)10 -0.448736   0.328276  -1.367 0.172715
-## as.factor(YEAR)2013:as.factor(MONTH)10  0.129053   0.340790   0.379 0.705200
-## as.factor(YEAR)2014:as.factor(MONTH)10  0.150621   0.333692   0.451 0.652059
-## as.factor(YEAR)2015:as.factor(MONTH)10  0.213589   0.340360   0.628 0.530807
-## as.factor(YEAR)2016:as.factor(MONTH)10 -0.189450   0.328436  -0.577 0.564513
-## as.factor(YEAR)2017:as.factor(MONTH)10 -0.563762   0.332706  -1.694 0.091264
-## as.factor(YEAR)2018:as.factor(MONTH)10 -0.057643   0.370772  -0.155 0.876563
-## as.factor(YEAR)2011:as.factor(MONTH)11 -1.149382   0.330961  -3.473 0.000595
-## as.factor(YEAR)2012:as.factor(MONTH)11 -0.804015   0.328754  -2.446 0.015062
-## as.factor(YEAR)2013:as.factor(MONTH)11 -0.180816   0.340550  -0.531 0.595865
-## as.factor(YEAR)2014:as.factor(MONTH)11 -0.218372   0.332265  -0.657 0.511567
-## as.factor(YEAR)2015:as.factor(MONTH)11 -0.004147   0.341163  -0.012 0.990310
-## as.factor(YEAR)2016:as.factor(MONTH)11 -0.244122   0.328878  -0.742 0.458521
-## as.factor(YEAR)2017:as.factor(MONTH)11 -0.718300   0.334079  -2.150 0.032387
-## as.factor(YEAR)2018:as.factor(MONTH)11 -0.400927   0.370456  -1.082 0.280052
-## as.factor(YEAR)2011:as.factor(MONTH)12 -1.441149   0.332430  -4.335 2.02e-05
-## as.factor(YEAR)2012:as.factor(MONTH)12 -1.163066   0.333482  -3.488 0.000564
-## as.factor(YEAR)2013:as.factor(MONTH)12 -0.333352   0.339048  -0.983 0.326340
-## as.factor(YEAR)2014:as.factor(MONTH)12 -0.619339   0.329146  -1.882 0.060899
-## as.factor(YEAR)2015:as.factor(MONTH)12 -0.138001   0.343330  -0.402 0.688022
-## as.factor(YEAR)2016:as.factor(MONTH)12 -0.303983   0.328636  -0.925 0.355755
-## as.factor(YEAR)2017:as.factor(MONTH)12 -0.961910   0.332460  -2.893 0.004105
-## as.factor(YEAR)2018:as.factor(MONTH)12 -0.580961   0.365527  -1.589 0.113079
-##                                           
-## (Intercept)                            ***
-## partnortheast                             
-## partsouth                              ***
-## partwest                               ***
-## as.factor(YEAR)2011                    ***
-## as.factor(YEAR)2012                       
-## as.factor(YEAR)2013                    .  
-## as.factor(YEAR)2014                       
-## as.factor(YEAR)2015                       
-## as.factor(YEAR)2016                    .  
-## as.factor(YEAR)2017                    ** 
-## as.factor(YEAR)2018                       
-## as.factor(MONTH)2                         
-## as.factor(MONTH)3                      ***
-## as.factor(MONTH)4                         
-## as.factor(MONTH)5                         
-## as.factor(MONTH)7                         
-## as.factor(MONTH)8                         
-## as.factor(MONTH)9                         
-## as.factor(MONTH)10                        
-## as.factor(MONTH)11                        
-## as.factor(MONTH)12                     ** 
-## flu_coverage                           ***
-## Flu_CI_per_thousand                    ***
-## as.factor(YEAR)2011:as.factor(MONTH)2     
-## as.factor(YEAR)2012:as.factor(MONTH)2     
-## as.factor(YEAR)2013:as.factor(MONTH)2     
-## as.factor(YEAR)2014:as.factor(MONTH)2     
-## as.factor(YEAR)2015:as.factor(MONTH)2     
-## as.factor(YEAR)2016:as.factor(MONTH)2     
-## as.factor(YEAR)2017:as.factor(MONTH)2     
-## as.factor(YEAR)2018:as.factor(MONTH)2     
-## as.factor(YEAR)2011:as.factor(MONTH)3     
-## as.factor(YEAR)2012:as.factor(MONTH)3  *  
-## as.factor(YEAR)2013:as.factor(MONTH)3     
-## as.factor(YEAR)2014:as.factor(MONTH)3     
-## as.factor(YEAR)2015:as.factor(MONTH)3     
-## as.factor(YEAR)2016:as.factor(MONTH)3     
-## as.factor(YEAR)2017:as.factor(MONTH)3     
-## as.factor(YEAR)2018:as.factor(MONTH)3     
-## as.factor(YEAR)2011:as.factor(MONTH)4     
-## as.factor(YEAR)2012:as.factor(MONTH)4  *  
-## as.factor(YEAR)2013:as.factor(MONTH)4     
-## as.factor(YEAR)2014:as.factor(MONTH)4     
-## as.factor(YEAR)2015:as.factor(MONTH)4     
-## as.factor(YEAR)2016:as.factor(MONTH)4     
-## as.factor(YEAR)2017:as.factor(MONTH)4     
-## as.factor(YEAR)2018:as.factor(MONTH)4     
-## as.factor(YEAR)2011:as.factor(MONTH)5  *  
-## as.factor(YEAR)2012:as.factor(MONTH)5  .  
-## as.factor(YEAR)2013:as.factor(MONTH)5     
-## as.factor(YEAR)2014:as.factor(MONTH)5     
-## as.factor(YEAR)2015:as.factor(MONTH)5     
-## as.factor(YEAR)2016:as.factor(MONTH)5     
-## as.factor(YEAR)2017:as.factor(MONTH)5     
-## as.factor(YEAR)2018:as.factor(MONTH)5     
-## as.factor(YEAR)2011:as.factor(MONTH)7     
-## as.factor(YEAR)2012:as.factor(MONTH)7     
-## as.factor(YEAR)2013:as.factor(MONTH)7     
-## as.factor(YEAR)2014:as.factor(MONTH)7     
-## as.factor(YEAR)2015:as.factor(MONTH)7     
-## as.factor(YEAR)2016:as.factor(MONTH)7     
-## as.factor(YEAR)2017:as.factor(MONTH)7     
-## as.factor(YEAR)2018:as.factor(MONTH)7     
-## as.factor(YEAR)2011:as.factor(MONTH)8  *  
-## as.factor(YEAR)2012:as.factor(MONTH)8     
-## as.factor(YEAR)2013:as.factor(MONTH)8     
-## as.factor(YEAR)2014:as.factor(MONTH)8     
-## as.factor(YEAR)2015:as.factor(MONTH)8     
-## as.factor(YEAR)2016:as.factor(MONTH)8     
-## as.factor(YEAR)2017:as.factor(MONTH)8     
-## as.factor(YEAR)2018:as.factor(MONTH)8     
-## as.factor(YEAR)2011:as.factor(MONTH)9  *  
-## as.factor(YEAR)2012:as.factor(MONTH)9     
-## as.factor(YEAR)2013:as.factor(MONTH)9     
-## as.factor(YEAR)2014:as.factor(MONTH)9     
-## as.factor(YEAR)2015:as.factor(MONTH)9     
-## as.factor(YEAR)2016:as.factor(MONTH)9     
-## as.factor(YEAR)2017:as.factor(MONTH)9     
-## as.factor(YEAR)2018:as.factor(MONTH)9     
-## as.factor(YEAR)2011:as.factor(MONTH)10 ** 
-## as.factor(YEAR)2012:as.factor(MONTH)10    
-## as.factor(YEAR)2013:as.factor(MONTH)10    
-## as.factor(YEAR)2014:as.factor(MONTH)10    
-## as.factor(YEAR)2015:as.factor(MONTH)10    
-## as.factor(YEAR)2016:as.factor(MONTH)10    
-## as.factor(YEAR)2017:as.factor(MONTH)10 .  
-## as.factor(YEAR)2018:as.factor(MONTH)10    
-## as.factor(YEAR)2011:as.factor(MONTH)11 ***
-## as.factor(YEAR)2012:as.factor(MONTH)11 *  
-## as.factor(YEAR)2013:as.factor(MONTH)11    
-## as.factor(YEAR)2014:as.factor(MONTH)11    
-## as.factor(YEAR)2015:as.factor(MONTH)11    
-## as.factor(YEAR)2016:as.factor(MONTH)11    
-## as.factor(YEAR)2017:as.factor(MONTH)11 *  
-## as.factor(YEAR)2018:as.factor(MONTH)11    
-## as.factor(YEAR)2011:as.factor(MONTH)12 ***
-## as.factor(YEAR)2012:as.factor(MONTH)12 ***
-## as.factor(YEAR)2013:as.factor(MONTH)12    
-## as.factor(YEAR)2014:as.factor(MONTH)12 .  
-## as.factor(YEAR)2015:as.factor(MONTH)12    
-## as.factor(YEAR)2016:as.factor(MONTH)12    
-## as.factor(YEAR)2017:as.factor(MONTH)12 ** 
-## as.factor(YEAR)2018:as.factor(MONTH)12    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.3277 on 286 degrees of freedom
-##   (44 observations deleted due to missingness)
-## Multiple R-squared:  0.9191, Adjusted R-squared:  0.8905 
-## F-statistic: 32.16 on 101 and 286 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>#likelihood ratio test of full model with interactions vs without
-lrtest(linmod5, linmod6) #p value of 0.0004; this thinks the interaction term is better</code></pre>
-<pre><code>## Likelihood ratio test
-## 
-## Model 1: Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + 
-##     flu_coverage + Flu_CI_per_thousand
-## Model 2: Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + 
-##     flu_coverage + Flu_CI_per_thousand + as.factor(YEAR) * as.factor(MONTH)
-##   #Df   LogLik Df  Chisq Pr(&gt;Chisq)    
-## 1  25 -121.886                         
-## 2 103  -58.544 78 126.68  0.0004103 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
-<pre class="r"><code>#now test full model against model with just region, year, and month in it
-#what other fit assessments should I do? </code></pre>
-<p><img src="Models_files/figure-html/unnamed-chunk-13-1.png" width="960" /></p>
-<pre class="r"><code>#now try to fit the model just for those 3 years that has the PCV data as well, just for 5-9 years old
-flu_by_month_regions_5 &lt;- flu_by_month_regions |&gt; filter(AGEGRP %in% c(&quot;05_09&quot;))
-flu_by_month_regions_5_vis &lt;- aggregate(NVISITS ~ part  + YEAR + MONTH, 
-                                       dat = flu_by_month_regions_5,
-                                       sum)
-flu_by_month_regions_5_memb &lt;- aggregate(NMEMB ~ part  + YEAR + MONTH, 
-                                       dat = flu_by_month_regions_5,
-                                       sum)
-flu_by_month_regions_5 &lt;- left_join(flu_by_month_regions_5_vis, flu_by_month_regions_5_memb)</code></pre>
-<pre><code>## Joining, by = c(&quot;part&quot;, &quot;YEAR&quot;, &quot;MONTH&quot;)</code></pre>
-<pre class="r"><code>flu_by_month_regions_5 &lt;- flu_by_month_regions_5 |&gt; 
-  mutate(&quot;Flu_CI_per_thousand&quot; = NVISITS/NMEMB *1000) |&gt; 
-  select(-NVISITS, -NMEMB)
-#need to get flu_vax data just for 5-9 age group
-#joint3 has flu coverage and strep data
-strep_flu_vax_pcv_59 &lt;- left_join(joint3, flu_by_month_regions_5) |&gt; 
-  left_join(strep_pcv) |&gt; 
-  filter(YEAR %in% c(2016, 2017, 2018)) |&gt; 
-  mutate(Strep_CI_per_thousand = CI_per_thousand) |&gt;
-  select(-CI_per_thousand, -Strep_CI_per_ten_thousand, -Strep_CI_per_five_thousand, -Strep_CI_per_two_thousand, -Strep_CI_per_five_hundred)</code></pre>
-<pre><code>## Joining, by = c(&quot;part&quot;, &quot;YEAR&quot;, &quot;MONTH&quot;)
-## Joining, by = c(&quot;part&quot;, &quot;YEAR&quot;)</code></pre>
-<pre class="r"><code>#do same model fit process
-pcv_mod1 &lt;- lm(Strep_CI_per_thousand ~part, strep_flu_vax_pcv_59)
-summary(pcv_mod1) #R^2 0.3098, adjusted R^2 0.295</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part, data = strep_flu_vax_pcv_59)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -10.1614  -4.1494  -0.1053   2.9827  13.3578 
-## 
-## Coefficients:
-##               Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)    12.1746     0.9237  13.180  &lt; 2e-16 ***
-## partnortheast   2.9385     1.3064   2.249   0.0261 *  
-## partsouth       2.9301     1.3064   2.243   0.0265 *  
-## partwest       -6.0338     1.3064  -4.619 8.66e-06 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 5.542 on 140 degrees of freedom
-## Multiple R-squared:  0.3098, Adjusted R-squared:  0.295 
-## F-statistic: 20.95 on 3 and 140 DF,  p-value: 2.869e-11</code></pre>
-<pre class="r"><code>#add year
-pcv_mod2 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR), strep_flu_vax_pcv_59)
-summary(pcv_mod2) #R^2 0.3169, adjusted R^20.2922</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part + as.factor(YEAR), 
-##     data = strep_flu_vax_pcv_59)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -10.5080  -3.6351   0.1468   2.7201  13.2660 
-## 
-## Coefficients:
-##                     Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)         12.61119    1.13361  11.125  &lt; 2e-16 ***
-## partnortheast        2.93846    1.30898   2.245   0.0264 *  
-## partsouth            2.93013    1.30898   2.238   0.0268 *  
-## partwest            -6.03380    1.30898  -4.610  9.1e-06 ***
-## as.factor(YEAR)2017 -0.08995    1.13361  -0.079   0.9369    
-## as.factor(YEAR)2018 -1.21969    1.13361  -1.076   0.2838    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 5.554 on 138 degrees of freedom
-## Multiple R-squared:  0.3169, Adjusted R-squared:  0.2922 
-## F-statistic: 12.81 on 5 and 138 DF,  p-value: 3.135e-10</code></pre>
-<pre class="r"><code>#add month
-pcv_mod3 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH), strep_flu_vax_pcv_59)
-summary(pcv_mod3) #R^2 0.8539, adjusted R^2 0.8355</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part + as.factor(YEAR) + 
-##     as.factor(MONTH), data = strep_flu_vax_pcv_59)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -6.6931 -1.6276 -0.0071  1.6563  6.8508 
-## 
-## Coefficients:
-##                      Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)          16.73680    0.91988  18.195  &lt; 2e-16 ***
-## partnortheast         2.93846    0.63103   4.657 7.98e-06 ***
-## partsouth             2.93013    0.63103   4.643 8.43e-06 ***
-## partwest             -6.03380    0.63103  -9.562  &lt; 2e-16 ***
-## as.factor(YEAR)2017  -0.08995    0.54649  -0.165  0.86953    
-## as.factor(YEAR)2018  -1.21969    0.54649  -2.232  0.02738 *  
-## as.factor(MONTH)2     3.63043    1.09298   3.322  0.00117 ** 
-## as.factor(MONTH)3     3.01417    1.09298   2.758  0.00668 ** 
-## as.factor(MONTH)4    -1.25962    1.09298  -1.152  0.25129    
-## as.factor(MONTH)5    -1.72863    1.09298  -1.582  0.11623    
-## as.factor(MONTH)6    -7.90102    1.09298  -7.229 4.03e-11 ***
-## as.factor(MONTH)7   -11.30450    1.09298 -10.343  &lt; 2e-16 ***
-## as.factor(MONTH)8   -10.57484    1.09298  -9.675  &lt; 2e-16 ***
-## as.factor(MONTH)9    -8.70996    1.09298  -7.969 7.92e-13 ***
-## as.factor(MONTH)10   -6.50374    1.09298  -5.950 2.44e-08 ***
-## as.factor(MONTH)11   -5.23649    1.09298  -4.791 4.55e-06 ***
-## as.factor(MONTH)12   -2.93308    1.09298  -2.684  0.00825 ** 
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 2.677 on 127 degrees of freedom
-## Multiple R-squared:  0.8539, Adjusted R-squared:  0.8355 
-## F-statistic: 46.39 on 16 and 127 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>#add flu_coverage 
-pcv_mod4 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage, strep_flu_vax_pcv_59)
-summary(pcv_mod4) #R^2 is 0.8721, adjusted R^2 0.8544</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part + as.factor(YEAR) + 
-##     as.factor(MONTH) + flu_coverage, data = strep_flu_vax_pcv_59)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -6.6772 -1.4596 -0.0646  1.6463  6.2246 
-## 
-## Coefficients:
-##                     Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)          -5.7299     5.7541  -0.996 0.321442    
-## partnortheast        -0.4553     1.0092  -0.451 0.652776    
-## partsouth             2.7706     0.6352   4.362 2.83e-05 ***
-## partwest             -6.4378     0.6323 -10.181  &lt; 2e-16 ***
-## as.factor(YEAR)2017   0.3701     0.5591   0.662 0.509358    
-## as.factor(YEAR)2018  -1.4345     0.5500  -2.608 0.010315 *  
-## as.factor(MONTH)2     2.7409     1.0716   2.558 0.011836 *  
-## as.factor(MONTH)3     1.6103     1.1059   1.456 0.148115    
-## as.factor(MONTH)4    -2.9770     1.1336  -2.626 0.009811 ** 
-## as.factor(MONTH)5    -3.5762     1.1465  -3.119 0.002292 ** 
-## as.factor(MONTH)7    11.7867     5.9049   1.996 0.048287 *  
-## as.factor(MONTH)8    10.4618     5.3968   1.939 0.055012 .  
-## as.factor(MONTH)9     7.8232     4.2907   1.823 0.070857 .  
-## as.factor(MONTH)10    1.3465     2.2363   0.602 0.548293    
-## as.factor(MONTH)11   -2.2611     1.2880  -1.756 0.081835 .  
-## as.factor(MONTH)12   -1.8117     1.0853  -1.669 0.097773 .  
-## flu_coverage          0.4145     0.1043   3.974 0.000124 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 2.567 on 115 degrees of freedom
-##   (12 observations deleted due to missingness)
-## Multiple R-squared:  0.8721, Adjusted R-squared:  0.8544 
-## F-statistic: 49.03 on 16 and 115 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>#add flu cases
-pcv_mod5 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand, strep_flu_vax_pcv_59)
-summary(pcv_mod5) #R^2 0.8983, adjusted R^2 0.8831</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part + as.factor(YEAR) + 
-##     as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand, data = strep_flu_vax_pcv_59)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -4.8956 -1.4898 -0.1403  1.4725  5.5746 
-## 
-## Coefficients:
-##                      Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)         -11.80189    5.27514  -2.237 0.027213 *  
-## partnortheast        -1.16171    0.91345  -1.272 0.206040    
-## partsouth             1.90439    0.59105   3.222 0.001659 ** 
-## partwest             -6.20632    0.56804 -10.926  &lt; 2e-16 ***
-## as.factor(YEAR)2017   0.01785    0.50509   0.035 0.971874    
-## as.factor(YEAR)2018  -2.40295    0.52419  -4.584 1.18e-05 ***
-## as.factor(MONTH)2     1.45662    0.98884   1.473 0.143490    
-## as.factor(MONTH)3     1.67276    0.99077   1.688 0.094079 .  
-## as.factor(MONTH)4    -1.56424    1.04848  -1.492 0.138484    
-## as.factor(MONTH)5    -1.70594    1.08359  -1.574 0.118178    
-## as.factor(MONTH)7    18.55974    5.43556   3.415 0.000886 ***
-## as.factor(MONTH)8    16.84264    4.97609   3.385 0.000978 ***
-## as.factor(MONTH)9    13.32403    3.97566   3.351 0.001091 ** 
-## as.factor(MONTH)10    5.14446    2.12261   2.424 0.016938 *  
-## as.factor(MONTH)11    0.50499    1.26187   0.400 0.689764    
-## as.factor(MONTH)12   -0.30415    1.01132  -0.301 0.764156    
-## flu_coverage          0.49285    0.09456   5.212 8.40e-07 ***
-## Flu_CI_per_thousand   0.28435    0.05252   5.414 3.46e-07 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 2.3 on 114 degrees of freedom
-##   (12 observations deleted due to missingness)
-## Multiple R-squared:  0.8983, Adjusted R-squared:  0.8831 
-## F-statistic: 59.23 on 17 and 114 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>#add pcv coverage
-pcv_mod6 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage, strep_flu_vax_pcv_59)
-summary(pcv_mod6) #R^2 0.8991, adjusted R^2 0.883; pretty much no change</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part + as.factor(YEAR) + 
-##     as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage, 
-##     data = strep_flu_vax_pcv_59)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -4.5459 -1.5198 -0.0108  1.3881  5.5547 
-## 
-## Coefficients:
-##                      Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)         -32.36644   22.21305  -1.457 0.147864    
-## partnortheast        -2.49679    1.67253  -1.493 0.138270    
-## partsouth             1.47461    0.74362   1.983 0.049790 *  
-## partwest             -6.26261    0.57133 -10.961  &lt; 2e-16 ***
-## as.factor(YEAR)2017  -0.10712    0.52203  -0.205 0.837787    
-## as.factor(YEAR)2018  -2.55653    0.54860  -4.660 8.70e-06 ***
-## as.factor(MONTH)2     1.42396    0.98983   1.439 0.153032    
-## as.factor(MONTH)3     1.66514    0.99120   1.680 0.095734 .  
-## as.factor(MONTH)4    -1.54546    1.04909  -1.473 0.143493    
-## as.factor(MONTH)5    -1.67837    1.08441  -1.548 0.124484    
-## as.factor(MONTH)7    18.84902    5.44621   3.461 0.000761 ***
-## as.factor(MONTH)8    17.11061    4.98603   3.432 0.000839 ***
-## as.factor(MONTH)9    13.54485    3.98400   3.400 0.000933 ***
-## as.factor(MONTH)10    5.27425    2.12783   2.479 0.014663 *  
-## as.factor(MONTH)11    0.58208    1.26496   0.460 0.646290    
-## as.factor(MONTH)12   -0.26532    1.01255  -0.262 0.793776    
-## flu_coverage          0.49714    0.09470   5.250 7.23e-07 ***
-## Flu_CI_per_thousand   0.29033    0.05292   5.486 2.54e-07 ***
-## pcv_coverage          0.24459    0.25663   0.953 0.342587    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 2.3 on 113 degrees of freedom
-##   (12 observations deleted due to missingness)
-## Multiple R-squared:  0.8991, Adjusted R-squared:  0.883 
-## F-statistic: 55.94 on 18 and 113 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>#likelihood ratio test of adding vs not adding PCV coverage
-lrtest(pcv_mod5, pcv_mod6) #p-value is 0.3039; no benefit to adding PCV coverage</code></pre>
-<pre><code>## Likelihood ratio test
-## 
-## Model 1: Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + 
-##     flu_coverage + Flu_CI_per_thousand
-## Model 2: Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + 
-##     flu_coverage + Flu_CI_per_thousand + pcv_coverage
-##   #Df  LogLik Df  Chisq Pr(&gt;Chisq)
-## 1  19 -287.54                     
-## 2  20 -287.01  1 1.0568     0.3039</code></pre>
-<pre class="r"><code>pcv_mod7 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage + as.factor(YEAR)*as.factor(MONTH), strep_flu_vax_pcv_59)
-summary(pcv_mod7) #R^2 0.9156, adjusted R^2 0.8811</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Strep_CI_per_thousand ~ part + as.factor(YEAR) + 
-##     as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage + 
-##     as.factor(YEAR) * as.factor(MONTH), data = strep_flu_vax_pcv_59)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -4.8109 -1.2377  0.0537  1.4697  4.8627 
-## 
-## Coefficients:
-##                                         Estimate Std. Error t value Pr(&gt;|t|)
-## (Intercept)                            -45.00876   22.82676  -1.972 0.051609
-## partnortheast                           -3.71301    1.74835  -2.124 0.036348
-## partsouth                                0.99641    0.79226   1.258 0.211657
-## partwest                                -6.21048    0.57822 -10.741  &lt; 2e-16
-## as.factor(YEAR)2017                      2.03380    1.69562   1.199 0.233403
-## as.factor(YEAR)2018                     -3.57609    2.30165  -1.554 0.123651
-## as.factor(MONTH)2                        2.41507    1.68553   1.433 0.155261
-## as.factor(MONTH)3                        0.99460    1.78331   0.558 0.578371
-## as.factor(MONTH)4                       -1.37461    1.70673  -0.805 0.422641
-## as.factor(MONTH)5                       -1.05837    1.70043  -0.622 0.535194
-## as.factor(MONTH)7                       25.68427    6.33405   4.055 0.000104
-## as.factor(MONTH)8                       23.28251    5.77272   4.033 0.000113
-## as.factor(MONTH)9                       19.20623    4.71968   4.069 9.88e-05
-## as.factor(MONTH)10                       8.77709    2.78461   3.152 0.002183
-## as.factor(MONTH)11                       3.59236    1.93022   1.861 0.065887
-## as.factor(MONTH)12                       2.87672    1.73665   1.656 0.100996
-## flu_coverage                             0.60597    0.10751   5.636 1.85e-07
-## Flu_CI_per_thousand                      0.39472    0.08492   4.648 1.10e-05
-## pcv_coverage                             0.31097    0.26140   1.190 0.237228
-## as.factor(YEAR)2017:as.factor(MONTH)2   -2.55552    2.33024  -1.097 0.275614
-## as.factor(YEAR)2018:as.factor(MONTH)2   -2.34782    2.32520  -1.010 0.315247
-## as.factor(YEAR)2017:as.factor(MONTH)3    0.02467    2.33808   0.011 0.991605
-## as.factor(YEAR)2018:as.factor(MONTH)3    1.24228    2.89798   0.429 0.669153
-## as.factor(YEAR)2017:as.factor(MONTH)4   -1.60815    2.34605  -0.685 0.494752
-## as.factor(YEAR)2018:as.factor(MONTH)4    1.65646    2.86156   0.579 0.564078
-## as.factor(YEAR)2017:as.factor(MONTH)5   -1.96684    2.34970  -0.837 0.404705
-## as.factor(YEAR)2018:as.factor(MONTH)5    1.09620    2.84095   0.386 0.700483
-## as.factor(YEAR)2017:as.factor(MONTH)7   -2.57073    2.35180  -1.093 0.277177
-## as.factor(YEAR)2018:as.factor(MONTH)7    2.90569    2.80866   1.035 0.303563
-## as.factor(YEAR)2017:as.factor(MONTH)8   -2.26462    2.34739  -0.965 0.337175
-## as.factor(YEAR)2018:as.factor(MONTH)8    2.96711    2.80766   1.057 0.293344
-## as.factor(YEAR)2017:as.factor(MONTH)9   -3.25192    2.35048  -1.384 0.169819
-## as.factor(YEAR)2018:as.factor(MONTH)9    1.90706    2.80407   0.680 0.498127
-## as.factor(YEAR)2017:as.factor(MONTH)10  -2.40537    2.34383  -1.026 0.307432
-## as.factor(YEAR)2018:as.factor(MONTH)10   0.62903    2.81915   0.223 0.823926
-## as.factor(YEAR)2017:as.factor(MONTH)11  -3.09819    2.33916  -1.324 0.188587
-## as.factor(YEAR)2018:as.factor(MONTH)11  -1.16186    2.82220  -0.412 0.681516
-## as.factor(YEAR)2017:as.factor(MONTH)12  -4.66892    2.32757  -2.006 0.047770
-## as.factor(YEAR)2018:as.factor(MONTH)12  -2.44690    2.73794  -0.894 0.373789
-##                                           
-## (Intercept)                            .  
-## partnortheast                          *  
-## partsouth                                 
-## partwest                               ***
-## as.factor(YEAR)2017                       
-## as.factor(YEAR)2018                       
-## as.factor(MONTH)2                         
-## as.factor(MONTH)3                         
-## as.factor(MONTH)4                         
-## as.factor(MONTH)5                         
-## as.factor(MONTH)7                      ***
-## as.factor(MONTH)8                      ***
-## as.factor(MONTH)9                      ***
-## as.factor(MONTH)10                     ** 
-## as.factor(MONTH)11                     .  
-## as.factor(MONTH)12                        
-## flu_coverage                           ***
-## Flu_CI_per_thousand                    ***
-## pcv_coverage                              
-## as.factor(YEAR)2017:as.factor(MONTH)2     
-## as.factor(YEAR)2018:as.factor(MONTH)2     
-## as.factor(YEAR)2017:as.factor(MONTH)3     
-## as.factor(YEAR)2018:as.factor(MONTH)3     
-## as.factor(YEAR)2017:as.factor(MONTH)4     
-## as.factor(YEAR)2018:as.factor(MONTH)4     
-## as.factor(YEAR)2017:as.factor(MONTH)5     
-## as.factor(YEAR)2018:as.factor(MONTH)5     
-## as.factor(YEAR)2017:as.factor(MONTH)7     
-## as.factor(YEAR)2018:as.factor(MONTH)7     
-## as.factor(YEAR)2017:as.factor(MONTH)8     
-## as.factor(YEAR)2018:as.factor(MONTH)8     
-## as.factor(YEAR)2017:as.factor(MONTH)9     
-## as.factor(YEAR)2018:as.factor(MONTH)9     
-## as.factor(YEAR)2017:as.factor(MONTH)10    
-## as.factor(YEAR)2018:as.factor(MONTH)10    
-## as.factor(YEAR)2017:as.factor(MONTH)11    
-## as.factor(YEAR)2018:as.factor(MONTH)11    
-## as.factor(YEAR)2017:as.factor(MONTH)12 *  
-## as.factor(YEAR)2018:as.factor(MONTH)12    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 2.32 on 93 degrees of freedom
-##   (12 observations deleted due to missingness)
-## Multiple R-squared:  0.9156, Adjusted R-squared:  0.8811 
-## F-statistic: 26.54 on 38 and 93 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>lrtest(pcv_mod6, pcv_mod7) #p-value for interaction vs no interaction is 0.2646; not significant</code></pre>
-<pre><code>## Likelihood ratio test
-## 
-## Model 1: Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + 
-##     flu_coverage + Flu_CI_per_thousand + pcv_coverage
-## Model 2: Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + 
-##     flu_coverage + Flu_CI_per_thousand + pcv_coverage + as.factor(YEAR) * 
-##     as.factor(MONTH)
-##   #Df  LogLik Df  Chisq Pr(&gt;Chisq)
-## 1  20 -287.01                     
-## 2  40 -275.26 20 23.507     0.2646</code></pre>
-<pre class="r"><code>#so best model does not even include PCV vaccination? but will just quickly show it with </code></pre>
-<p><img src="Models_files/figure-html/unnamed-chunk-15-1.png" width="960" /></p>
+distribution. In order to select an optimal model, I tested multiple
+combinations of parameters, and compared the <span
+class="math inline">\(R^2\)</span> values of these models to start. I
+used an adjusted <span class="math inline">\(R^2\)</span>, which is
+calculated using a penalty for parameters <span
+class="math inline">\(R^2_{adj} = R^2 -
+\frac{p(1-R^2)}{(n-p-1)}\)</span> where <span class="math inline">\(R^2
+= 1- \frac{\sum_{i=1}^n (y_i -\hat{y_i})}{\sum_{i=1}^n (y_i
+-\bar{y})}\)</span>.</p>
+<p><img src="Models_files/figure-html/unnamed-chunk-12-1.png" width="480" /></p>
+<p>We can see that <span class="math inline">\(R^2_{adj}\)</span>
+largely increases as number of parameters increase, although not always
+(the model with Region, Year, and Month has a higher<span
+class="math inline">\(R^2_{adj}\)</span> than the model with Region,
+Month, Flu coverage, and Flu cases). Larger values of <span
+class="math inline">\(R^2_{adj}\)</span> mean that the model accounts
+for a greater proportion of the variability of the outcome. The model
+with the highest <span class="math inline">\(R^2_{adj}\)</span> contains
+region, year, month, flu vaccination, flu cases, and a statistical
+interaction term bewteen year and month, and has an <span
+class="math inline">\(R^2_{adj}\)</span> of 0.89, The model with the
+second highest <span class="math inline">\(R^2_{adj}\)</span> contains
+region, year, month, flu vaccination, and flu cases, without a
+statistical interaction term between year and month. This model has an
+<span class="math inline">\(R^2_{adj}\)</span> of 0.88.</p>
+<p>We can also use the Akaike Information Criterion (AIC), calculated as
+<span class="math inline">\(AIC = -2log(\hat{L}) + 2(p+1)\)</span> where
+<span class="math inline">\(\hat{L}\)</span> is the maximum likelihood
+of the model, and p is number of parameters. The rationale for this
+criterion is that the likelihood must go up by more than is justified by
+the additional parameters added. Lower AIC values are better.</p>
+<p><img src="Models_files/figure-html/unnamed-chunk-13-1.png" width="480" /></p>
+<p>The model with the lowest AIC contains region, year, month, flu
+vaccination, and flu cases, without a statistical interaction between
+year and month. This model also has the second highest <span
+class="math inline">\(R^2_{adj}\)</span> so, it is likely the best fit
+of the available models. We can visualize our model’s predictions
+against the observed data.</p>
+<p><img src="Models_files/figure-html/unnamed-chunk-14-1.png" width="1440" /></p>
+<p>The model (solid line) generally tracks well with observed cases of
+streptococcal pharyngitis. We can next plot the model predictions with
+corresponding 95% confidence intervals against observed cases for each
+region separately.</p>
+<p><img src="Models_files/figure-html/unnamed-chunk-15-1.png" width="1152" /></p>
+<p>At this finer resolution, the model appears to predict cases in the
+South well, though it does not always capture the steep rise in cases in
+the fall and early winter. It somewhat overpredicts seasonal changes in
+the West (it predicts more cases in the beginning of the year and fewer
+in the early winter than are observed), and it predicts the Northeast
+and Midwest relatively faithfully.</p>
+<p>We next apply a similar strategy also including PCV vaccination data.
+Because PCV vaccination from the CDC is broken down by birth cohort, we
+include data from the 2011, 2012, and 2013 birth cohorts and compare
+children in these cohorts who received all 4 doses to cases of
+streptococcal pharyngitis and flu in children ages 5-9 in years 2016,
+2017, and 2018, when the children from these birth cohorts enter this
+age range. Flu vaccination data are taken from chidlren in the 5-12 year
+old age range. As before, we first compare <span
+class="math inline">\(R^2_{adj}\)</span> for linear models with
+different parameters.</p>
+<p><img src="Models_files/figure-html/unnamed-chunk-16-1.png" width="480" /></p>
+<p>The model with the highest value of <span
+class="math inline">\(R^2_{adj}\)</span> here is not the model with the
+most parameters, but rather includes region, year, month, flu
+vaccination and flu cases. The <span
+class="math inline">\(R^2_{adj}\)</span> for this model is 0.88,
+indicating that it explains about 88% of the variability in
+streptococcal pharyngitis cases. Notably, models including PCV
+vaccination have lower <span class="math inline">\(R^2_{adj}\)</span>
+values, indicating that this covariate does not help to explain
+variation in cases of streptococcal pharyngitis. We next compare AIC for
+each model.</p>
+<p><img src="Models_files/figure-html/unnamed-chunk-17-1.png" width="480" /></p>
+<p>Here, the lowest AIC also corresponds to the same model with the
+highest <span class="math inline">\(R^2_{adj}\)</span>, indicating that
+this is the best available model. We can again visualize our model’s
+predictions against observed data.</p>
+<p><img src="Models_files/figure-html/unnamed-chunk-18-1.png" width="1440" /></p>
+<p>The models once again track reasonably well with observed data. We
+can zoom in on predictions in each region as before.</p>
+<p><img src="Models_files/figure-html/unnamed-chunk-19-1.png" width="1152" />
+Here we see similar trends as before, which makes sense given that we
+have essentially fit the same model just in years 2016-2018, and with
+only 5-9 year olds (the age group with the highest burden of
+disease).</p>
 <div id="appendix" class="section level2">
 <h2>Appendix</h2>
 <pre class="r"><code>knitr::opts_chunk$set(echo = TRUE)
@@ -1499,48 +763,149 @@ strep_flu_vax_allages &lt;- left_join(joint2,joint4) |&gt; mutate(Strep_CI_per_t
 linmod1 &lt;- lm(Strep_CI_per_thousand ~ part,strep_flu_vax_allages)
 summary(linmod1)
 strep_flu_vax_allages |&gt; mutate(pred = predict(linmod1, strep_flu_vax_allages)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2))
+adjr2_1 &lt;- summary(linmod1)$adj.r.squared
 #RMSE 9.969183e-16, R^2: 0.3375, adjusted R^2 0.3328
 #try adding in covariates
+aic1 &lt;- summary(glm(Strep_CI_per_thousand ~ part,strep_flu_vax_allages, family = gaussian))$aic
+#AIC is 1032.722
+
 
 #add year
 linmod2 &lt;- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR), strep_flu_vax_allages)
 summary(linmod2) #RMSE 1.040379e-15; R^2 0.3955, Adjusted R^2 0.3797
 strep_flu_vax_allages |&gt; mutate(pred = predict(linmod2, strep_flu_vax_allages)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2)) 
+aic2 &lt;- summary(glm(Strep_CI_per_thousand ~ part + as.factor(YEAR),strep_flu_vax_allages, family = gaussian))$aic
+#AIC 1009.125
+adjr2_2 &lt;- summary(linmod2)$adj.r.squared
 
 #add month 
 linmod3 &lt;- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH),strep_flu_vax_allages)
 summary(linmod3) #RMSE 1.345368e-15  R^2 0.865, adjusted R^2 0.8578
-strep_flu_vax_allages |&gt; mutate(pred = predict(linmod3, strep_flu_vax_allages)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2))  
+strep_flu_vax_allages |&gt; mutate(pred = predict(linmod3, strep_flu_vax_allages)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2))
+adjr2_3 &lt;- summary(linmod3)$adj.r.squared
+aic3 &lt;- summary(glm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH),strep_flu_vax_allages, family = gaussian))$aic
+#AIC 383.3943
 
 #adding in flu vaccination coverage
 linmod4 &lt;- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage, strep_flu_vax_allages)
 summary(linmod4) #RMSE 2.252061e-15   R^2 0.873, adjusted R^2 0.8654
 strep_flu_vax_allages_nojune &lt;- strep_flu_vax_allages |&gt; filter(MONTH != 6)
+adjr2_4 &lt;- summary(linmod4)$adj.r.squared
 strep_flu_vax_allages_nojune |&gt; mutate(pred = predict(linmod4, strep_flu_vax_allages_nojune)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand, na.rm = TRUE)^2)) 
+aic4 &lt;- summary(glm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage,strep_flu_vax_allages, family = gaussian))$aic
+#AIC 339.7997
 
 #adding in flu CI as well
 linmod5 &lt;- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand,strep_flu_vax_allages)
 summary(linmod5) #RMSE 1.86077e-15 R^2 0.8878, adjusted R^2 0.8807
-strep_flu_vax_allages_nojune |&gt; mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand, na.rm = TRUE)^2)) 
+adjr2_5 &lt;- summary(linmod5)$adj.r.squared
+strep_flu_vax_allages_nojune |&gt; mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune)) |&gt; summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand, na.rm = TRUE)^2))
+aic5 &lt;- summary(glm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand,strep_flu_vax_allages, family = gaussian))$aic
+#AIC 293.772
 
 #try a month and year interaction term
 linmod6 &lt;- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + as.factor(YEAR)*as.factor(MONTH),strep_flu_vax_allages)
 summary(linmod6) #R^2 0.9191, adjusted R-squared 0.8905
+adjr2_6 &lt;- summary(linmod6)$adj.r.squared
+aic6 &lt;- summary(glm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + as.factor(YEAR)*as.factor(MONTH),strep_flu_vax_allages, family = gaussian))$aic
+#AIC 323.0887
+
+#trying without year
+linmod7 &lt;- lm(Strep_CI_per_thousand ~ part + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand,strep_flu_vax_allages)
+summary(linmod7) #R^2 0.8339, adjusted r^2 0.8272
+adjr2_7 &lt;- summary(linmod7)$adj.r.squared
+aic7 &lt;- summary(glm(Strep_CI_per_thousand ~ part + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand,strep_flu_vax_allages, family = gaussian))$aic
+#AIC 430.0374
 
 #likelihood ratio test of full model with interactions vs without
 lrtest(linmod5, linmod6) #p value of 0.0004; this thinks the interaction term is better
 
-#now test full model against model with just region, year, and month in it
-#what other fit assessments should I do? 
+#make a plot of the aics
+model_inclusion &lt;- c(&quot;Region only&quot;, &quot;Region and Year&quot;, &quot;Region, Year, Month&quot;, &quot;Region, Year, Month, Flu Vaccination&quot;, &quot;Region, Year, Month, Flu Vaccination, Flu Cases&quot;, &quot;Region, Year, Month, Flu Vaccination, Flu Cases,Year and Month interaction&quot;, &quot;Region, Month, Flu Coverage, Flu Cases&quot;)
+AICs &lt;- c(aic1, aic2, aic3, aic4, aic5, aic6, aic7)
+R2s &lt;- c(adjr2_1, adjr2_2, adjr2_3, adjr2_4, adjr2_5 ,adjr2_6, adjr2_7)
+
+
+model_df &lt;- data.frame(Models = model_inclusion, AIC = AICs, &quot;R2&quot; &lt;- R2s)
+R2_order &lt;- model_df |&gt; arrange(R2) |&gt; pull(Models)
+model_df |&gt; ggplot(aes(x = factor(Models, level = R2_order ), y = R2)) + 
+  geom_point() + 
+  ylim(0,1) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 10), axis.title.x = element_blank()) +
+  labs(title = &quot;Adjusted R-squared by Model Parameter Inclusion&quot;)
+level_order &lt;- model_df |&gt; arrange(desc(AIC)) |&gt; pull(Models) 
+model_df |&gt; ggplot(aes(x = factor(Models, level = level_order ), y = AIC)) + 
+  geom_point() + 
+  ylim(0,1100) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 10), axis.title.x = element_blank()) +
+  labs(title = &quot;AIC by Model Parameter Inclusion&quot;)
+
 strep_flu_vax_allages_nojune |&gt; 
-  mutate(pred = predict(linmod6, strep_flu_vax_allages_nojune)) |&gt;
+  mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune)) |&gt;
   pivot_longer(cols = c(&quot;Strep_CI_per_thousand&quot;, &quot;pred&quot;)) |&gt;
   ggplot(aes(MONTH, value, color = part)) + 
   geom_line(aes(linetype = name)) +
   facet_wrap(~YEAR) +
   scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;, &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + 
+  theme_bw() + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
-  scale_linetype_discrete(name= &quot;Value Plotted&quot;, labels = c(&quot;Predicted Strep Cases per 1000 People&quot;, &quot;Observed Strep Cases per 1000 People&quot;)) + labs(color = &quot;Region&quot;)
+  scale_linetype_discrete(name= &quot;Value Plotted&quot;, labels = c(&quot;Predicted Strep Cases per 1000 People&quot;, &quot;Observed Strep Cases per 1000 People&quot;)) + labs(color = &quot;Region&quot;, title = &quot;Predicted and Observed Streptococcal Pharyngitis Cases, All Ages&quot;) 
+south &lt;- strep_flu_vax_allages_nojune |&gt; 
+  mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune),
+         lower = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = &quot;confidence&quot;))$lwr, 
+         upper = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = &quot;confidence&quot;))$upr) |&gt;
+  filter(part == &quot;south&quot;) |&gt;
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = &quot;cyan&quot;) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = &quot;cyan&quot;, alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;, &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = &quot;Predicted Strep Cases per 1000 People&quot;) + ggtitle(&quot;South&quot;)
+
+midwest &lt;- strep_flu_vax_allages_nojune |&gt; 
+  mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune),
+         lower = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = &quot;confidence&quot;))$lwr, 
+         upper = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = &quot;confidence&quot;))$upr) |&gt;
+  filter(part == &quot;midwest&quot;) |&gt;
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = &quot;red&quot;) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = &quot;red&quot;, alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;, &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = &quot;Predicted Strep Cases per 1000 People&quot;) + ggtitle(&quot;Midwest&quot;)
+
+northeast &lt;-  strep_flu_vax_allages_nojune |&gt; 
+  mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune),
+         lower = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = &quot;confidence&quot;))$lwr, 
+         upper = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = &quot;confidence&quot;))$upr) |&gt;
+  filter(part == &quot;northeast&quot;) |&gt;
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = &quot;green&quot;) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = &quot;green&quot;, alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;, &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = &quot;Predicted Strep Cases per 1000 People&quot;) + ggtitle(&quot;Northeast&quot;) 
+
+west &lt;- strep_flu_vax_allages_nojune |&gt; 
+  mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune),
+         lower = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = &quot;confidence&quot;))$lwr, 
+         upper = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = &quot;confidence&quot;))$upr) |&gt;
+  filter(part == &quot;west&quot;) |&gt;
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = &quot;purple&quot;) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = &quot;purple&quot;, alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;, &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = &quot;Predicted Strep Cases per 1000 People&quot;) + ggtitle(&quot;West&quot;)
+
+
+grid.arrange(south, west, northeast, midwest, ncol = 2)
 
 #now try to fit the model just for those 3 years that has the PCV data as well, just for 5-9 years old
 flu_by_month_regions_5 &lt;- flu_by_month_regions |&gt; filter(AGEGRP %in% c(&quot;05_09&quot;))
@@ -1564,48 +929,149 @@ strep_flu_vax_pcv_59 &lt;- left_join(joint3, flu_by_month_regions_5) |&gt;
 #do same model fit process
 pcv_mod1 &lt;- lm(Strep_CI_per_thousand ~part, strep_flu_vax_pcv_59)
 summary(pcv_mod1) #R^2 0.3098, adjusted R^2 0.295
+pr2_1 &lt;- summary(pcv_mod1)$adj.r.squared
+paic1 &lt;- glm(Strep_CI_per_thousand ~part, strep_flu_vax_pcv_59, family = gaussian)$aic
+#AIC 907.7759
 
 #add year
 pcv_mod2 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR), strep_flu_vax_pcv_59)
 summary(pcv_mod2) #R^2 0.3169, adjusted R^20.2922
+pr2_2 &lt;- summary(pcv_mod2)$adj.r.squared
+paic2 &lt;- glm(Strep_CI_per_thousand ~part + as.factor(YEAR), strep_flu_vax_pcv_59, family = gaussian)$aic
+#AIC 910.283
 
 #add month
 pcv_mod3 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH), strep_flu_vax_pcv_59)
 summary(pcv_mod3) #R^2 0.8539, adjusted R^2 0.8355
+pr2_3 &lt;- summary(pcv_mod3)$adj.r.squared
+paic3 &lt;- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH), strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 710.1823
 
 
 #add flu_coverage 
 pcv_mod4 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage, strep_flu_vax_pcv_59)
 summary(pcv_mod4) #R^2 is 0.8721, adjusted R^2 0.8544
+pr2_4 &lt;- summary(pcv_mod4)$adj.r.squared
+paic4 &lt;- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage, strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 641.2862
 
 #add flu cases
 pcv_mod5 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand, strep_flu_vax_pcv_59)
 summary(pcv_mod5) #R^2 0.8983, adjusted R^2 0.8831
+pr2_5 &lt;- summary(pcv_mod5)$adj.r.squared
+paic5 &lt;- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand, strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 613.0843
+
 
 #add pcv coverage
 pcv_mod6 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage, strep_flu_vax_pcv_59)
 summary(pcv_mod6) #R^2 0.8991, adjusted R^2 0.883; pretty much no change
+pr2_6 &lt;- summary(pcv_mod6)$adj.r.squared
+paic6 &lt;- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage, strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 614.0274
 
 #likelihood ratio test of adding vs not adding PCV coverage
 lrtest(pcv_mod5, pcv_mod6) #p-value is 0.3039; no benefit to adding PCV coverage
 
 pcv_mod7 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage + as.factor(YEAR)*as.factor(MONTH), strep_flu_vax_pcv_59)
 summary(pcv_mod7) #R^2 0.9156, adjusted R^2 0.8811
+pr2_7 &lt;- summary(pcv_mod7)$adj.r.squared
+paic7 &lt;- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage + as.factor(YEAR)*as.factor(MONTH), strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 630.5204
+
+pcv_mod8 &lt;- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + as.factor(YEAR)*as.factor(MONTH), strep_flu_vax_pcv_59)
+summary(pcv_mod8) #R^2 0.9143, adjusted R^2 0.8805
+pr2_8 &lt;- summary(pcv_mod8)$adj.r.squared
+paic8 &lt;- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + as.factor(YEAR)*as.factor(MONTH), strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 630.5139
+
 
 lrtest(pcv_mod6, pcv_mod7) #p-value for interaction vs no interaction is 0.2646; not significant
-#so best model does not even include PCV vaccination? but will just quickly show it with 
+
+pmodel_inclusion &lt;- c(&quot;Region only&quot;, &quot;Region and Year&quot;, &quot;Region, Year, and Month&quot;,&quot;Region, Year, Month, and Flu Vaccination&quot;, &quot;Region, Year, Month, Flu Vaccination, and Flu Cases&quot;, &quot;Region, Year, Month, Flu Vaccination, Flu Cases, and PCV Vaccination&quot;, &quot;Region, Year, Month, Flu Vaccination, Flu Cases, PCV Vaccination, Year*Month&quot;, &quot;Region, Year, Month, Flu Vaccination, Flu Cases, Year*Month&quot;)
+pAICs &lt;- c(paic1, paic2, paic3, paic4, paic5, paic6, paic7, paic8)
+pR2s &lt;- c(pr2_1, pr2_2, pr2_3, pr2_4, pr2_5, pr2_6, pr2_7, pr2_8)
+
+p_model_df &lt;- data.frame(Models = pmodel_inclusion, AIC = pAICs, R2 = pR2s)
+pR2_levels &lt;- p_model_df |&gt; arrange(R2) |&gt; pull(Models)
+p_level_order &lt;- p_model_df |&gt; arrange(desc(AIC)) |&gt; pull(Models) 
+
+p_model_df |&gt; ggplot(aes(x = factor(Models, level = pR2_levels ), y = R2)) + 
+  geom_point() + 
+  ylim(0,1) +
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 10), axis.title.x = element_blank()) +
+  labs(title = &quot;Adjusted R-squared by Model Parameter Inclusion, 2016-2018, Ages 5-9&quot;)
+p_model_df |&gt; ggplot(aes(x = factor(Models, level = p_level_order ), y = AIC)) + 
+  geom_point() + 
+  ylim(0,950) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 10), axis.title.x = element_blank()) +
+  labs(title = &quot;AIC by Model Parameter Inclusion, 2016-2018, Ages 5-9&quot;)
 
 strep_flu_vax_pcv_59_nojune &lt;- strep_flu_vax_pcv_59 |&gt; 
   filter(MONTH != 6) 
 strep_flu_vax_pcv_59_nojune |&gt; 
-  mutate(pred = predict(pcv_mod7, strep_flu_vax_pcv_59_nojune)) |&gt;
+  mutate(pred = predict(pcv_mod5, strep_flu_vax_pcv_59_nojune),
+         lower = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = &quot;confidence&quot;))$lwr, 
+         upper = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = &quot;confidence&quot;))$upr) |&gt;
   pivot_longer(cols = c(&quot;Strep_CI_per_thousand&quot;, &quot;pred&quot;)) |&gt; 
   ggplot(aes(MONTH, value, color = part)) + 
-  geom_line(aes(linetype = name)) +
+  geom_line(aes(linetype = name)) + 
   facet_wrap(~YEAR) +
   scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;, &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + 
+  theme_bw() + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
-  scale_linetype_discrete(name= &quot;Value Plotted&quot;, labels = c(&quot;Predicted Strep Cases per 1000 People&quot;, &quot;Observed Strep Cases per 1000 People&quot;)) + labs(color = &quot;Region&quot;)</code></pre>
+  scale_linetype_discrete(name= &quot;Value Plotted&quot;, labels = c(&quot;Predicted Strep Cases per 1000 People&quot;, &quot;Observed Strep Cases per 1000 People&quot;)) + labs(color = &quot;Region&quot;)
+
+south &lt;- strep_flu_vax_pcv_59_nojune |&gt; 
+  mutate(pred = predict(pcv_mod5, strep_flu_vax_pcv_59_nojune),
+         lower = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = &quot;confidence&quot;))$lwr, 
+         upper = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = &quot;confidence&quot;))$upr) |&gt;
+  filter(part == &quot;south&quot;) |&gt;
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = &quot;cyan&quot;) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = &quot;cyan&quot;, alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;, &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = &quot;Predicted Strep Cases per 1000 People&quot;) + ggtitle(&quot;South&quot;) 
+midwest &lt;- strep_flu_vax_pcv_59_nojune |&gt; 
+  mutate(pred = predict(pcv_mod5, strep_flu_vax_pcv_59_nojune),
+         lower = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = &quot;confidence&quot;))$lwr, 
+         upper = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = &quot;confidence&quot;))$upr) |&gt;
+  filter(part == &quot;midwest&quot;) |&gt;
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = &quot;red&quot;) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = &quot;red&quot;, alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;, &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = &quot;Predicted Strep Cases per 1000 People&quot;) + ggtitle(&quot;Midwest&quot;) 
+northeast &lt;- strep_flu_vax_pcv_59_nojune |&gt; 
+  mutate(pred = predict(pcv_mod5, strep_flu_vax_pcv_59_nojune),
+         lower = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = &quot;confidence&quot;))$lwr, 
+         upper = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = &quot;confidence&quot;))$upr) |&gt;
+  filter(part == &quot;northeast&quot;) |&gt;
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = &quot;green&quot;) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = &quot;green&quot;, alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;, &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = &quot;Predicted Strep Cases per 1000 People&quot;) + ggtitle(&quot;Northeast&quot;) 
+west &lt;- strep_flu_vax_pcv_59_nojune |&gt; 
+  mutate(pred = predict(pcv_mod5, strep_flu_vax_pcv_59_nojune),
+         lower = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = &quot;confidence&quot;))$lwr, 
+         upper = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = &quot;confidence&quot;))$upr) |&gt;
+  filter(part == &quot;west&quot;) |&gt;
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = &quot;purple&quot;) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = &quot;purple&quot;, alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;, &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) +
+  labs(y = &quot;Predicted Strep Cases per 1000 People&quot;) + ggtitle(&quot;West&quot;) + theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+
+grid.arrange(south, west, northeast, midwest, ncol = 2)</code></pre>
 </div>
 
 

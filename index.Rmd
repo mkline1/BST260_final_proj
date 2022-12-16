@@ -6,7 +6,9 @@ title: "Introduction"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Streptococcal pharyngitis, known colloquially as “strep throat,” is the number one cause of pharyngitis in children, accounting for 15-30% of pharyngitis between the ages of 5-15, and up to as many as 35-40% of cases during the winter and early spring. There is an estimated prevalence is 37% among children[1][2][3] . Symptoms typically include a characteristic sore throat, sometimes alongside fever, abdominal pain, or headache. Streptococcal pharyngitis is caused by group A Streptococcus, or Streptococcus pyogenes, and is clearly diagnosed with the rapid antigen detection test, throat culture, or NAAT. Treatment with the appropriate penicillin antibiotics is recommended to decrease the chance of some complications, including acute rheumatic fever, which can cause lasting cardiac valvular damage. There are known geographic patterns across the US for some other respiratory illnesses, including influenza, which is known to start in the south east and rise in other parts of the country after that [4]. Comparatively little is known about the geographic distribution of streptococcal pharyngitis in the US. The MarketScan database, comprised of insurance claims data from private insurers across the US, provides an opportunity to investigate the distribution of streptococcal pharyngitis in the US. Claims data for streptococcal pharyngitis were extracted from MarketScan, separated by year 2010-2018, month, sex, age group, and state. Data for flu with the same properties was also extracted from MarketScan for comparison, and vaccination data for flu and PCV were obtained through CDC FluVax and ChildVax respectively. The question we seek to address is whether rates of streptococcal pharyngitis are different in different parts of the country, and if so, what factors contribute to these differences.
+Streptococcal pharyngitis, known colloquially as “strep throat,” is the number one cause of pharyngitis in children, accounting for 15-30% of pharyngitis between the ages of 5-15, and up to as many as 35-40% of cases during the winter and early spring. There is an estimated prevalence of 37% among children[1][2][3] . Symptoms typically include a characteristic sore throat, sometimes alongside fever, abdominal pain, or headache. Streptococcal pharyngitis is caused by group A _Streptococcus_, or _Streptococcus pyogenes_, and is clearly diagnosed with the rapid antigen detection test, throat culture, or NAAT. Treatment with the appropriate penicillin antibiotics is recommended to decrease the chance of some complications, including acute rheumatic fever, which can cause lasting cardiac valvular damage. There are known geographic patterns across the US for some other respiratory illnesses, including influenza, which starts in the Southeast and subsequently rises in other parts of the country [4]. Comparatively little is known about the geographic distribution of streptococcal pharyngitis in the US.  
+\linebreak
+  The MarketScan database, comprised of insurance claims data from private insurers across the US, provides an opportunity to investigate the distribution of streptococcal pharyngitis in the US. Claims data for streptococcal pharyngitis were extracted from MarketScan, separated by year from 2010 to 2018, month, sex, age group (by decile with the youngest age group split between 0-4 and 5-9), and state. Data for flu with the same properties were also extracted from MarketScan for comparison, and vaccination data for flu and PCV were obtained through CDC FluVax and ChildVax respectively. The question we seek to address is whether rates of streptococcal pharyngitis are different in different parts of the country throughout the year and across years, and if so, what factors contribute to these differences.
 
 ```{r, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 library(tidyverse)
@@ -35,7 +37,8 @@ by_year |> group_by(YEAR) |> summarize(total_vis = sum(NVISITS), total_memb = su
 
 
 ```
-We can see from this graph that the cases per person of streptococcal pharyngitis are relatively stable from year to year between 2010-2018, with slightly higher cases in 2011 and 2016-217. We can  separate by age and see that streptococcal pharyngitis is most common in 5-9 year olds, followed by 0-4 year olds, then 10-19 year olds, and there are not many cases in people older than 20, which is consistent with the known distribution of streptococcal pharyngitis as stated above.. 
+  
+We can see from this graph that the cases per person of streptococcal pharyngitis are relatively stable from year to year between 2010-2018, with slightly more cases in 2011 and 2016-217. We next separate by age. 
 
 ```{r, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 #let's summarize cumulative incidence by state across years to start
@@ -100,8 +103,11 @@ country_by_age <- country_by_age |> mutate(CI_per_hundred = NVISITS/NMEMB * 100)
 country_by_age |> ggplot(aes(YEAR, CI_per_hundred, group = AGEGRP)) + geom_line(aes(color = AGEGRP)) + ggtitle("Streptococcal Pharyngitis in the US from 2010-2018 \n By Age Group") + theme_bw() + ylab("Cases per 100 People") + labs(color = "Age Group")
 
 ```
+  
 
-We can split this data by region to see if there are trends that differ in different parts of the country.
+Here we see that streptococcal pharyngitis is most common in 5-9 year olds, followed by 0-4 year olds, then 10-19 year olds, and there are not many cases in people older than 20, which is consistent with the known age distribution of streptococcal pharyngitis as stated above.     
+\linebreak  
+We can split this data by region to see if there are trends that differ in different parts of the country. We divide the country into 4 regions, Northeast (comprised of Connecticut, Massachusetts, Maine, New Hampshire, Rhode Island, Vermont, New Jersey, New York, and Pennsylvania), Midwest (comprised of Illinois, Indiana, Michigan, Ohio, Wisconsin, Iowa, Kansas, Minnesota, Missouri, Nebraska, North Dakota, and South Dakata), South (comprised of Delaware, Florida, Georgia, Maryland, North Carolina, South Carolina, Virginia, West Virginia, Alabama, Kentucky, Mississippi, Tennessee, Arizona, Louisiana, Oklahoma, and Texas), and West (comprised of Arizona, Colorado, Indiana, Montana, Nevada, New Mexico, Utah, Wyoming, Arkansas, California, Hawaii, Oregon, and Washington). 
 ```{r, fig.width = 10, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 
 
@@ -152,13 +158,12 @@ by_month_regions_only <- by_month_regions_only |> mutate("CI_per_thousand" = NVI
 by_month_regions_only |> ggplot(aes(x = MONTH, y = CI_per_thousand, group = part)) + 
   geom_line(aes(color = part)) +
   facet_wrap(~YEAR) + ggtitle("Steptococcal Pharyngitis Cases Incidence by Month \n All Ages, by Region") + labs(color = "Region") + ylab("Cases per 1,000 People") +scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT",
-                                                                                                                                   "OCT", "NOV", "DEC")) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
-
+                                                                                                                                   "OCT", "NOV", "DEC")) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme_bw()
 
 
 ```
 
-We see that the West has fewer cases of streptococcal pharyngitis throughout the year, but the South tracks pretty well with the Northeast and Midwest through the beginning of the year, but cases rise earlier and higher starting at the end of the summer and into the fall. My analysis will seek to identify what factors drive this regional difference in case rates. 
+We see that the West has fewer cases of streptococcal pharyngitis throughout the year. The South tracks pretty well with the Northeast and Midwest through the beginning of the year, but cases rise earlier and higher starting at the end of the summer and into the fall. My analysis will seek to identify what factors drive this regional difference in case rates. 
 
 
 

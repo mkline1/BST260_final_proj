@@ -16,7 +16,7 @@
 <script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -32,8 +32,6 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -261,20 +259,7 @@ $(document).ready(function () {
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li>
-  <a href="mailto:madeleine_kline@g.harvard.edu">
-    <span class="fa fa-envelope-o"></span>
-     
-    Contact me
-  </a>
-</li>
-<li>
-  <a href="https://github.com/mkline1">
-    <span class="fa fa-github"></span>
-     
-    Github
-  </a>
-</li>
+        
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -293,39 +278,53 @@ $(document).ready(function () {
 the number one cause of pharyngitis in children, accounting for 15-30%
 of pharyngitis between the ages of 5-15, and up to as many as 35-40% of
 cases during the winter and early spring. There is an estimated
-prevalence is 37% among children[1][2][3] . Symptoms typically include a
+prevalence of 37% among children[1][2][3] . Symptoms typically include a
 characteristic sore throat, sometimes alongside fever, abdominal pain,
 or headache. Streptococcal pharyngitis is caused by group A
-Streptococcus, or Streptococcus pyogenes, and is clearly diagnosed with
-the rapid antigen detection test, throat culture, or NAAT. Treatment
-with the appropriate penicillin antibiotics is recommended to decrease
-the chance of some complications, including acute rheumatic fever, which
-can cause lasting cardiac valvular damage. There are known geographic
-patterns across the US for some other respiratory illnesses, including
-influenza, which is known to start in the south east and rise in other
-parts of the country after that [4]. Comparatively little is known about
-the geographic distribution of streptococcal pharyngitis in the US. The
-MarketScan database, comprised of insurance claims data from private
+<em>Streptococcus</em>, or <em>Streptococcus pyogenes</em>, and is
+clearly diagnosed with the rapid antigen detection test, throat culture,
+or NAAT. Treatment with the appropriate penicillin antibiotics is
+recommended to decrease the chance of some complications, including
+acute rheumatic fever, which can cause lasting cardiac valvular damage.
+There are known geographic patterns across the US for some other
+respiratory illnesses, including influenza, which starts in the
+Southeast and subsequently rises in other parts of the country [4].
+Comparatively little is known about the geographic distribution of
+streptococcal pharyngitis in the US.<br />
+The MarketScan database, comprised of insurance claims data from private
 insurers across the US, provides an opportunity to investigate the
 distribution of streptococcal pharyngitis in the US. Claims data for
 streptococcal pharyngitis were extracted from MarketScan, separated by
-year 2010-2018, month, sex, age group, and state. Data for flu with the
-same properties was also extracted from MarketScan for comparison, and
-vaccination data for flu and PCV were obtained through CDC FluVax and
-ChildVax respectively. The question we seek to address is whether rates
-of streptococcal pharyngitis are different in different parts of the
-country, and if so, what factors contribute to these differences.</p>
-<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" width="672" />
-We can see from this graph that the cases per person of streptococcal
+year from 2010 to 2018, month, sex, age group (by decile with the
+youngest age group split between 0-4 and 5-9), and state. Data for flu
+with the same properties were also extracted from MarketScan for
+comparison, and vaccination data for flu and PCV were obtained through
+CDC FluVax and ChildVax respectively. The question we seek to address is
+whether rates of streptococcal pharyngitis are different in different
+parts of the country throughout the year and across years, and if so,
+what factors contribute to these differences.</p>
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>We can see from this graph that the cases per person of streptococcal
 pharyngitis are relatively stable from year to year between 2010-2018,
-with slightly higher cases in 2011 and 2016-217. We can separate by age
-and see that streptococcal pharyngitis is most common in 5-9 year olds,
-followed by 0-4 year olds, then 10-19 year olds, and there are not many
-cases in people older than 20, which is consistent with the known
-distribution of streptococcal pharyngitis as stated above..</p>
+with slightly more cases in 2011 and 2016-217. We next separate by
+age.</p>
 <p><img src="index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-<p>We can split this data by region to see if there are trends that
-differ in different parts of the country.
+<p>Here we see that streptococcal pharyngitis is most common in 5-9 year
+olds, followed by 0-4 year olds, then 10-19 year olds, and there are not
+many cases in people older than 20, which is consistent with the known
+age distribution of streptococcal pharyngitis as stated above.<br />
+We can split this data by region to see if there are trends that differ
+in different parts of the country. We divide the country into 4 regions,
+Northeast (comprised of Connecticut, Massachusetts, Maine, New
+Hampshire, Rhode Island, Vermont, New Jersey, New York, and
+Pennsylvania), Midwest (comprised of Illinois, Indiana, Michigan, Ohio,
+Wisconsin, Iowa, Kansas, Minnesota, Missouri, Nebraska, North Dakota,
+and South Dakata), South (comprised of Delaware, Florida, Georgia,
+Maryland, North Carolina, South Carolina, Virginia, West Virginia,
+Alabama, Kentucky, Mississippi, Tennessee, Arizona, Louisiana, Oklahoma,
+and Texas), and West (comprised of Arizona, Colorado, Indiana, Montana,
+Nevada, New Mexico, Utah, Wyoming, Arkansas, California, Hawaii, Oregon,
+and Washington).
 <img src="index_files/figure-html/unnamed-chunk-3-1.png" width="960" />
 From this plot we can see that streptococcal pharyngitis cases are
 generally higher in the South, and lower in the West, and that this
@@ -334,11 +333,11 @@ see if there are differences in trends throughout the year by
 region.</p>
 <p><img src="index_files/figure-html/unnamed-chunk-4-1.png" width="960" /></p>
 <p>We see that the West has fewer cases of streptococcal pharyngitis
-throughout the year, but the South tracks pretty well with the Northeast
-and Midwest through the beginning of the year, but cases rise earlier
-and higher starting at the end of the summer and into the fall. My
-analysis will seek to identify what factors drive this regional
-difference in case rates.</p>
+throughout the year. The South tracks pretty well with the Northeast and
+Midwest through the beginning of the year, but cases rise earlier and
+higher starting at the end of the summer and into the fall. My analysis
+will seek to identify what factors drive this regional difference in
+case rates.</p>
 <div id="appendix" class="section level2">
 <h2>Appendix</h2>
 <pre class="r"><code>knitr::opts_chunk$set(echo = TRUE)
@@ -473,7 +472,7 @@ by_month_regions_only &lt;- by_month_regions_only |&gt; mutate(&quot;CI_per_thou
 by_month_regions_only |&gt; ggplot(aes(x = MONTH, y = CI_per_thousand, group = part)) + 
   geom_line(aes(color = part)) +
   facet_wrap(~YEAR) + ggtitle(&quot;Steptococcal Pharyngitis Cases Incidence by Month \n All Ages, by Region&quot;) + labs(color = &quot;Region&quot;) + ylab(&quot;Cases per 1,000 People&quot;) +scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;,
-                                                                                                                                   &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))</code></pre>
+                                                                                                                                   &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme_bw()</code></pre>
 </div>
 
 

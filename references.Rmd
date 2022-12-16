@@ -18,6 +18,7 @@ knitr::opts_chunk$set(echo = TRUE)
       <li>Luo, R. et al. Diagnosis and Management of Group a Streptococcal Pharyngitis in the United States, 2011–2015. BMC Infect Dis 19, 193 (2019).</li>
       <li>Weekly U.S. Influenza Surveillance Report | CDC. https://www.cdc.gov/flu/weekly/index.htm.</li>
       <li>FluVaxView | FluVaxView | Seasonal Influenza (Flu) | CDC. https://www.cdc.gov/flu/fluvaxview/index.htm (2022).</li>
+      <li> Kissler, S. M., Klevens, R. M., Barnett, M. L. & Grad, Y. H. Distinguishing the Roles of Antibiotic Stewardship and Reductions in Outpatient Visits in Generating a 5-Year Decline in Antibiotic Prescribing. Clinical Infectious Diseases 72, 1568–1576 (2021). </li>
       <li>Ron Dagan, Stephen Pelton, Lauren Bakaletz, & Robert Cohen. Prevention of early episodes of otitis media by pneumococcal vaccines might reduce progression to complex disease. The Lancet Infectious Diseases 16,. </li>
       <li>Ben-Shimol, S. et al. Impact of Widespread Introduction of Pneumococcal Conjugate Vaccines on Pneumococcal and Nonpneumococcal Otitis Media. Clinical Infectious Diseases 63, 611–618 (2016). </li>
       <li>ChildVaxView | CDC. https://www.cdc.gov/vaccines/imz-managers/coverage/childvaxview/index.html (2022).</li>
@@ -25,3 +26,5 @@ knitr::opts_chunk$set(echo = TRUE)
    </ol>
 </body>
 </html>
+
+### Thank you so much Stephen Kissler and Yonatan Grad for your help!

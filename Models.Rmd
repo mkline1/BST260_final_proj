@@ -1,6 +1,5 @@
 ---
 title: "Models"
-
 ---
 
 ```{r setup, include=FALSE}
@@ -423,64 +422,187 @@ south <- strep_pcv_pivoted |> filter(part == "south") |> ggplot(aes(x = YEAR, y 
 # grid.arrange(midwest, northeast, west, south, ncol = 2, nrow =2)
 
 ```
-I will fit a number of models in order to better understand drivers of regional patterns of streptococcal pharyngitis. First, I will consider all years and all months, to look for a temporal trend. I will then add in covariates on flu cases and vaccination. I am using a linear model because my streptococcal pharyngitis cases are already reported as total counts for a given year, month, age, so we can assume that with large enough amounts of data, the errors will follow a normal distribution.
+I will fit a model to better understand drivers of regional patterns of streptococcal pharyngitis. I will first consider all age groups across all years of data (2010-2018), and with possible covariates region, year, month, flu vaccination (monthly), and flu cases. I am using a linear regression model because streptococcal pharyngitis cases are already reported as total counts for a given year and month, so with large enough amounts of data, the errors will follow a normal distribution. In order to select an optimal model, I tested multiple combinations of parameters, and compared the $R^2$ values of these models to start. I used an adjusted $R^2$, which is calculated using a penalty for parameters $R^2_{adj} = R^2 - \frac{p(1-R^2)}{(n-p-1)}$ where $R^2 =  1- \frac{\sum_{i=1}^n (y_i -\hat{y_i})}{\sum_{i=1}^n (y_i -\bar{y})}$. 
 
-```{r}
+```{r, fig.width = 5, fig.height = 8, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 joint4 <- flu_by_month_regions_only |> select(-NVISITS, -NMEMB, -CI_per_ten_thousand, -CI_per_hundred_thousand) |> mutate(Flu_CI_per_thousand = CI_per_thousand) |> select(-CI_per_thousand)
 strep_flu_vax_allages <- left_join(joint2,joint4) |> mutate(Strep_CI_per_thousand = CI_per_thousand) |> select(-CI_per_thousand, -Strep_CI_per_ten_thousand)
 
 linmod1 <- lm(Strep_CI_per_thousand ~ part,strep_flu_vax_allages)
 summary(linmod1)
 strep_flu_vax_allages |> mutate(pred = predict(linmod1, strep_flu_vax_allages)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2))
+adjr2_1 <- summary(linmod1)$adj.r.squared
 #RMSE 9.969183e-16, R^2: 0.3375, adjusted R^2 0.3328
 #try adding in covariates
+aic1 <- summary(glm(Strep_CI_per_thousand ~ part,strep_flu_vax_allages, family = gaussian))$aic
+#AIC is 1032.722
+
 
 #add year
 linmod2 <- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR), strep_flu_vax_allages)
 summary(linmod2) #RMSE 1.040379e-15; R^2 0.3955, Adjusted R^2 0.3797
 strep_flu_vax_allages |> mutate(pred = predict(linmod2, strep_flu_vax_allages)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2)) 
+aic2 <- summary(glm(Strep_CI_per_thousand ~ part + as.factor(YEAR),strep_flu_vax_allages, family = gaussian))$aic
+#AIC 1009.125
+adjr2_2 <- summary(linmod2)$adj.r.squared
 
 #add month 
 linmod3 <- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH),strep_flu_vax_allages)
 summary(linmod3) #RMSE 1.345368e-15	 R^2 0.865, adjusted R^2 0.8578
-strep_flu_vax_allages |> mutate(pred = predict(linmod3, strep_flu_vax_allages)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2))  
+strep_flu_vax_allages |> mutate(pred = predict(linmod3, strep_flu_vax_allages)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand)^2))
+adjr2_3 <- summary(linmod3)$adj.r.squared
+aic3 <- summary(glm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH),strep_flu_vax_allages, family = gaussian))$aic
+#AIC 383.3943
 
 #adding in flu vaccination coverage
 linmod4 <- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage, strep_flu_vax_allages)
 summary(linmod4) #RMSE 2.252061e-15	  R^2 0.873, adjusted R^2 0.8654
 strep_flu_vax_allages_nojune <- strep_flu_vax_allages |> filter(MONTH != 6)
+adjr2_4 <- summary(linmod4)$adj.r.squared
 strep_flu_vax_allages_nojune |> mutate(pred = predict(linmod4, strep_flu_vax_allages_nojune)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand, na.rm = TRUE)^2)) 
+aic4 <- summary(glm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage,strep_flu_vax_allages, family = gaussian))$aic
+#AIC 339.7997
 
 #adding in flu CI as well
 linmod5 <- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand,strep_flu_vax_allages)
 summary(linmod5) #RMSE 1.86077e-15 R^2 0.8878, adjusted R^2 0.8807
-strep_flu_vax_allages_nojune |> mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand, na.rm = TRUE)^2)) 
+adjr2_5 <- summary(linmod5)$adj.r.squared
+strep_flu_vax_allages_nojune |> mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune)) |> summarize(RMSE = sqrt(mean(pred - Strep_CI_per_thousand, na.rm = TRUE)^2))
+aic5 <- summary(glm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand,strep_flu_vax_allages, family = gaussian))$aic
+#AIC 293.772
 
 #try a month and year interaction term
 linmod6 <- lm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + as.factor(YEAR)*as.factor(MONTH),strep_flu_vax_allages)
 summary(linmod6) #R^2 0.9191, adjusted R-squared 0.8905
+adjr2_6 <- summary(linmod6)$adj.r.squared
+aic6 <- summary(glm(Strep_CI_per_thousand ~ part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + as.factor(YEAR)*as.factor(MONTH),strep_flu_vax_allages, family = gaussian))$aic
+#AIC 323.0887
+
+#trying without year
+linmod7 <- lm(Strep_CI_per_thousand ~ part + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand,strep_flu_vax_allages)
+summary(linmod7) #R^2 0.8339, adjusted r^2 0.8272
+adjr2_7 <- summary(linmod7)$adj.r.squared
+aic7 <- summary(glm(Strep_CI_per_thousand ~ part + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand,strep_flu_vax_allages, family = gaussian))$aic
+#AIC 430.0374
 
 #likelihood ratio test of full model with interactions vs without
 lrtest(linmod5, linmod6) #p value of 0.0004; this thinks the interaction term is better
 
-#now test full model against model with just region, year, and month in it
-#what other fit assessments should I do? 
+#make a plot of the aics
+model_inclusion <- c("Region only", "Region and Year", "Region, Year, Month", "Region, Year, Month, Flu Vaccination", "Region, Year, Month, Flu Vaccination, Flu Cases", "Region, Year, Month, Flu Vaccination, Flu Cases,Year and Month interaction", "Region, Month, Flu Coverage, Flu Cases")
+AICs <- c(aic1, aic2, aic3, aic4, aic5, aic6, aic7)
+R2s <- c(adjr2_1, adjr2_2, adjr2_3, adjr2_4, adjr2_5 ,adjr2_6, adjr2_7)
+
+
+model_df <- data.frame(Models = model_inclusion, AIC = AICs, "R2" <- R2s)
+R2_order <- model_df |> arrange(R2) |> pull(Models)
+model_df |> ggplot(aes(x = factor(Models, level = R2_order ), y = R2)) + 
+  geom_point() + 
+  ylim(0,1) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 10), axis.title.x = element_blank()) +
+  labs(title = "Adjusted R-squared by Model Parameter Inclusion")
 ```
 
-```{r, fig.width = 10, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
+We can see that $R^2_{adj}$ largely increases as number of parameters increase, although not always (the model with Region, Year, and Month has a higher$R^2_{adj}$ than the model with Region, Month, Flu coverage, and Flu cases). Larger values of $R^2_{adj}$ mean that the model accounts for a greater proportion of the variability of the outcome.  The model with the highest $R^2_{adj}$ contains region, year, month, flu vaccination, flu cases, and a statistical interaction term bewteen year and month, and has an $R^2_{adj}$ of 0.89, The model with the second highest $R^2_{adj}$ contains region, year, month, flu vaccination, and flu cases, without a statistical interaction term between year and month. This model has an $R^2_{adj}$ of 0.88. 
+
+We can also use the Akaike Information Criterion (AIC), calculated as $AIC = -2log(\hat{L}) + 2(p+1)$ where $\hat{L}$ is the maximum likelihood of the model, and p is number of parameters. The rationale for this criterion is that the likelihood must go up by more than is justified by the additional parameters added. Lower AIC values are better. 
+
+
+```{r, fig.width = 5, fig.height = 8, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
+level_order <- model_df |> arrange(desc(AIC)) |> pull(Models) 
+model_df |> ggplot(aes(x = factor(Models, level = level_order ), y = AIC)) + 
+  geom_point() + 
+  ylim(0,1100) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 10), axis.title.x = element_blank()) +
+  labs(title = "AIC by Model Parameter Inclusion")
+
+```
+  
+The model with the lowest AIC contains region, year, month, flu vaccination, and flu cases, without a statistical interaction between year and month. This model also has the second highest $R^2_{adj}$ so, it is likely the best fit of the available models. We can visualize our model's predictions against the observed data. 
+
+
+```{r, fig.width = 15, fig.height = 10, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 strep_flu_vax_allages_nojune |> 
-  mutate(pred = predict(linmod6, strep_flu_vax_allages_nojune)) |>
+  mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune)) |>
   pivot_longer(cols = c("Strep_CI_per_thousand", "pred")) |>
   ggplot(aes(MONTH, value, color = part)) + 
   geom_line(aes(linetype = name)) +
   facet_wrap(~YEAR) +
   scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) + 
+  theme_bw() + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
-  scale_linetype_discrete(name= "Value Plotted", labels = c("Predicted Strep Cases per 1000 People", "Observed Strep Cases per 1000 People")) + labs(color = "Region")
+  scale_linetype_discrete(name= "Value Plotted", labels = c("Predicted Strep Cases per 1000 People", "Observed Strep Cases per 1000 People")) + labs(color = "Region", title = "Predicted and Observed Streptococcal Pharyngitis Cases, All Ages") 
+```
+
+The model (solid line) generally tracks well with observed cases of streptococcal pharyngitis. We can next plot the model predictions with corresponding 95% confidence intervals against observed cases for each region separately.
+
+
+```{r, fig.width = 12, fig.height = 10,echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
+south <- strep_flu_vax_allages_nojune |> 
+  mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune),
+         lower = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = "confidence"))$lwr, 
+         upper = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = "confidence"))$upr) |>
+  filter(part == "south") |>
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = "cyan") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "cyan", alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = "Predicted Strep Cases per 1000 People") + ggtitle("South")
+
+midwest <- strep_flu_vax_allages_nojune |> 
+  mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune),
+         lower = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = "confidence"))$lwr, 
+         upper = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = "confidence"))$upr) |>
+  filter(part == "midwest") |>
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = "red") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "red", alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = "Predicted Strep Cases per 1000 People") + ggtitle("Midwest")
+
+northeast <-  strep_flu_vax_allages_nojune |> 
+  mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune),
+         lower = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = "confidence"))$lwr, 
+         upper = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = "confidence"))$upr) |>
+  filter(part == "northeast") |>
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = "green") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "green", alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = "Predicted Strep Cases per 1000 People") + ggtitle("Northeast") 
+
+west <- strep_flu_vax_allages_nojune |> 
+  mutate(pred = predict(linmod5, strep_flu_vax_allages_nojune),
+         lower = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = "confidence"))$lwr, 
+         upper = as.data.frame(predict(linmod5, strep_flu_vax_allages_nojune, interval = "confidence"))$upr) |>
+  filter(part == "west") |>
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = "purple") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "purple", alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = "Predicted Strep Cases per 1000 People") + ggtitle("West")
+
+
+grid.arrange(south, west, northeast, midwest, ncol = 2)
 
 ```
 
-```{r}
+At this finer resolution, the model appears to predict cases in the South well, though it does not always capture the steep rise in cases in the fall and early winter. It somewhat overpredicts seasonal changes in the West (it predicts more cases in the beginning of the year and fewer in the early winter than are observed), and it predicts the Northeast and Midwest relatively faithfully.  
+
+We next apply a similar strategy also including PCV vaccination data. Because PCV vaccination from the CDC is broken down by birth cohort, we include data from the 2011, 2012, and 2013 birth cohorts and compare children in these cohorts who received all 4 doses to cases of streptococcal pharyngitis and flu in children ages 5-9 in years 2016, 2017, and 2018, when the children from these birth cohorts enter this age range. Flu vaccination data are taken from chidlren in the 5-12 year old age range. As before, we first compare $R^2_{adj}$ for linear models with different parameters. 
+
+
+```{r, fig.width = 5, fig.height = 8, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 #now try to fit the model just for those 3 years that has the PCV data as well, just for 5-9 years old
 flu_by_month_regions_5 <- flu_by_month_regions |> filter(AGEGRP %in% c("05_09"))
 flu_by_month_regions_5_vis <- aggregate(NVISITS ~ part  + YEAR + MONTH, 
@@ -503,54 +625,171 @@ strep_flu_vax_pcv_59 <- left_join(joint3, flu_by_month_regions_5) |>
 #do same model fit process
 pcv_mod1 <- lm(Strep_CI_per_thousand ~part, strep_flu_vax_pcv_59)
 summary(pcv_mod1) #R^2 0.3098, adjusted R^2 0.295
+pr2_1 <- summary(pcv_mod1)$adj.r.squared
+paic1 <- glm(Strep_CI_per_thousand ~part, strep_flu_vax_pcv_59, family = gaussian)$aic
+#AIC 907.7759
 
 #add year
 pcv_mod2 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR), strep_flu_vax_pcv_59)
 summary(pcv_mod2) #R^2 0.3169, adjusted R^20.2922
+pr2_2 <- summary(pcv_mod2)$adj.r.squared
+paic2 <- glm(Strep_CI_per_thousand ~part + as.factor(YEAR), strep_flu_vax_pcv_59, family = gaussian)$aic
+#AIC 910.283
 
 #add month
 pcv_mod3 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH), strep_flu_vax_pcv_59)
 summary(pcv_mod3) #R^2 0.8539, adjusted R^2 0.8355
+pr2_3 <- summary(pcv_mod3)$adj.r.squared
+paic3 <- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH), strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 710.1823
 
 
 #add flu_coverage 
 pcv_mod4 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage, strep_flu_vax_pcv_59)
 summary(pcv_mod4) #R^2 is 0.8721, adjusted R^2 0.8544
+pr2_4 <- summary(pcv_mod4)$adj.r.squared
+paic4 <- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage, strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 641.2862
 
 #add flu cases
 pcv_mod5 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand, strep_flu_vax_pcv_59)
 summary(pcv_mod5) #R^2 0.8983, adjusted R^2 0.8831
+pr2_5 <- summary(pcv_mod5)$adj.r.squared
+paic5 <- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand, strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 613.0843
+
 
 #add pcv coverage
 pcv_mod6 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage, strep_flu_vax_pcv_59)
 summary(pcv_mod6) #R^2 0.8991, adjusted R^2 0.883; pretty much no change
+pr2_6 <- summary(pcv_mod6)$adj.r.squared
+paic6 <- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage, strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 614.0274
 
 #likelihood ratio test of adding vs not adding PCV coverage
 lrtest(pcv_mod5, pcv_mod6) #p-value is 0.3039; no benefit to adding PCV coverage
 
 pcv_mod7 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage + as.factor(YEAR)*as.factor(MONTH), strep_flu_vax_pcv_59)
 summary(pcv_mod7) #R^2 0.9156, adjusted R^2 0.8811
+pr2_7 <- summary(pcv_mod7)$adj.r.squared
+paic7 <- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + pcv_coverage + as.factor(YEAR)*as.factor(MONTH), strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 630.5204
+
+pcv_mod8 <- lm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + as.factor(YEAR)*as.factor(MONTH), strep_flu_vax_pcv_59)
+summary(pcv_mod8) #R^2 0.9143, adjusted R^2 0.8805
+pr2_8 <- summary(pcv_mod8)$adj.r.squared
+paic8 <- glm(Strep_CI_per_thousand ~part + as.factor(YEAR) + as.factor(MONTH) + flu_coverage + Flu_CI_per_thousand + as.factor(YEAR)*as.factor(MONTH), strep_flu_vax_pcv_59, family = gaussian)$aic 
+#AIC 630.5139
+
 
 lrtest(pcv_mod6, pcv_mod7) #p-value for interaction vs no interaction is 0.2646; not significant
-#so best model does not even include PCV vaccination? but will just quickly show it with 
+
+pmodel_inclusion <- c("Region only", "Region and Year", "Region, Year, and Month","Region, Year, Month, and Flu Vaccination", "Region, Year, Month, Flu Vaccination, and Flu Cases", "Region, Year, Month, Flu Vaccination, Flu Cases, and PCV Vaccination", "Region, Year, Month, Flu Vaccination, Flu Cases, PCV Vaccination, Year*Month", "Region, Year, Month, Flu Vaccination, Flu Cases, Year*Month")
+pAICs <- c(paic1, paic2, paic3, paic4, paic5, paic6, paic7, paic8)
+pR2s <- c(pr2_1, pr2_2, pr2_3, pr2_4, pr2_5, pr2_6, pr2_7, pr2_8)
+
+p_model_df <- data.frame(Models = pmodel_inclusion, AIC = pAICs, R2 = pR2s)
+pR2_levels <- p_model_df |> arrange(R2) |> pull(Models)
+p_level_order <- p_model_df |> arrange(desc(AIC)) |> pull(Models) 
+
+p_model_df |> ggplot(aes(x = factor(Models, level = pR2_levels ), y = R2)) + 
+  geom_point() + 
+  ylim(0,1) +
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 10), axis.title.x = element_blank()) +
+  labs(title = "Adjusted R-squared by Model Parameter Inclusion, 2016-2018, Ages 5-9")
+```
+
+The model with the highest value of $R^2_{adj}$ here is not the model with the most parameters, but rather includes region, year, month, flu vaccination and flu cases. The $R^2_{adj}$ for this model is 0.88, indicating that it explains about 88% of the variability in streptococcal pharyngitis cases. Notably, models including PCV vaccination have lower $R^2_{adj}$ values, indicating that this covariate does not help to explain variation in cases of streptococcal pharyngitis. We next compare AIC for each model. 
+
+
+
+```{r, fig.width = 5, fig.height = 8, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
+p_model_df |> ggplot(aes(x = factor(Models, level = p_level_order ), y = AIC)) + 
+  geom_point() + 
+  ylim(0,950) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1, size = 10), axis.title.x = element_blank()) +
+  labs(title = "AIC by Model Parameter Inclusion, 2016-2018, Ages 5-9")
 
 ```
 
-```{r, fig.width = 10, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
+Here, the lowest AIC also corresponds to the same model with the highest $R^2_{adj}$, indicating that this is the best available model. We can again visualize our model's predictions against observed data. 
+
+```{r, fig.width = 15, fig.height = 10, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
 strep_flu_vax_pcv_59_nojune <- strep_flu_vax_pcv_59 |> 
   filter(MONTH != 6) 
 strep_flu_vax_pcv_59_nojune |> 
-  mutate(pred = predict(pcv_mod7, strep_flu_vax_pcv_59_nojune)) |>
+  mutate(pred = predict(pcv_mod5, strep_flu_vax_pcv_59_nojune),
+         lower = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = "confidence"))$lwr, 
+         upper = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = "confidence"))$upr) |>
   pivot_longer(cols = c("Strep_CI_per_thousand", "pred")) |> 
   ggplot(aes(MONTH, value, color = part)) + 
-  geom_line(aes(linetype = name)) +
+  geom_line(aes(linetype = name)) + 
   facet_wrap(~YEAR) +
   scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) + 
+  theme_bw() + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
   scale_linetype_discrete(name= "Value Plotted", labels = c("Predicted Strep Cases per 1000 People", "Observed Strep Cases per 1000 People")) + labs(color = "Region")
-
 ```
 
+The models once again track reasonably well with observed data. We can zoom in on predictions in each region as before. 
+
+```{r, fig.width = 12, fig.height = 10, echo=FALSE, results = 'hide', message = FALSE, warning = FALSE}
+
+south <- strep_flu_vax_pcv_59_nojune |> 
+  mutate(pred = predict(pcv_mod5, strep_flu_vax_pcv_59_nojune),
+         lower = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = "confidence"))$lwr, 
+         upper = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = "confidence"))$upr) |>
+  filter(part == "south") |>
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = "cyan") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "cyan", alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = "Predicted Strep Cases per 1000 People") + ggtitle("South") 
+midwest <- strep_flu_vax_pcv_59_nojune |> 
+  mutate(pred = predict(pcv_mod5, strep_flu_vax_pcv_59_nojune),
+         lower = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = "confidence"))$lwr, 
+         upper = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = "confidence"))$upr) |>
+  filter(part == "midwest") |>
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = "red") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "red", alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = "Predicted Strep Cases per 1000 People") + ggtitle("Midwest") 
+northeast <- strep_flu_vax_pcv_59_nojune |> 
+  mutate(pred = predict(pcv_mod5, strep_flu_vax_pcv_59_nojune),
+         lower = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = "confidence"))$lwr, 
+         upper = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = "confidence"))$upr) |>
+  filter(part == "northeast") |>
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = "green") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "green", alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) +
+  theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(y = "Predicted Strep Cases per 1000 People") + ggtitle("Northeast") 
+west <- strep_flu_vax_pcv_59_nojune |> 
+  mutate(pred = predict(pcv_mod5, strep_flu_vax_pcv_59_nojune),
+         lower = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = "confidence"))$lwr, 
+         upper = as.data.frame(predict(pcv_mod5, strep_flu_vax_pcv_59_nojune, interval = "confidence"))$upr) |>
+  filter(part == "west") |>
+  ggplot(aes(MONTH, Strep_CI_per_thousand)) + 
+  geom_line(color = "purple") +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "purple", alpha = 0.2)+ 
+  facet_wrap(~YEAR) +
+  scale_x_discrete(limits = c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEPT", "OCT", "NOV", "DEC")) +
+  labs(y = "Predicted Strep Cases per 1000 People") + ggtitle("West") + theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+
+grid.arrange(south, west, northeast, midwest, ncol = 2)
+
+
+
+```
+Here we see similar trends as before, which makes sense given that we have essentially fit the same model just in years 2016-2018, and with only 5-9 year olds (the age group with the highest burden of disease). 
 
 ## Appendix
 ```{r ref.label=knitr::all_labels(), echo=TRUE, eval=FALSE}

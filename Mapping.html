@@ -16,7 +16,7 @@
 <script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/yeti.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
@@ -32,8 +32,6 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
-<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -261,20 +259,7 @@ $(document).ready(function () {
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li>
-  <a href="mailto:madeleine_kline@g.harvard.edu">
-    <span class="fa fa-envelope-o"></span>
-     
-    Contact me
-  </a>
-</li>
-<li>
-  <a href="https://github.com/mkline1">
-    <span class="fa fa-github"></span>
-     
-    Github
-  </a>
-</li>
+        
       </ul>
     </div><!--/.nav-collapse -->
   </div><!--/.container -->
@@ -294,12 +279,12 @@ looking at case rates of streptococcal pharyngitis across states in the
 US over time.
 <img src="Mapping_files/figure-html/unnamed-chunk-5-1.png" width="960" /></p>
 <p>From this plot, we can see that that, across all age groups, cases of
-strep pharyngitis are much higher in states like Texas, Oklahoma,
-Mississippi, Tennessee and Kentucky have higher case rates, especially
-in more recent years (2016, 2017, 2018), and states in the Pacific
-Northwest such as California, Oregon, Washington, Montana and North
-Dakota, have lower case rates.</p>
-<p>We can look at how case rates trend by age group over time.
+streptococcal pharyngitis are much higher in states like Texas,
+Oklahoma, Mississippi, Tennessee and Kentucky, especially in more recent
+years (2016, 2017, 2018), and states in the Pacific Northwest such as
+California, Oregon, Washington, Montana and North Dakota, have lower
+case rates.</p>
+<p>We can look at how cases trend by age group over time.
 <img src="Mapping_files/figure-html/unnamed-chunk-6-1.png" width="1920" /></p>
 <p>From these plots, we can see that the cases of streptococcal
 pharyngitis are highest in the 5-9 year old age group, as previously
@@ -311,12 +296,22 @@ same data from MarketScan for flu data, using ICD codes: ICD9 4870,
 4871, 7878, ICD10: J100, J101, J108, J110, J111, and J118.</p>
 <p><img src="Mapping_files/figure-html/unnamed-chunk-7-1.png" width="960" /></p>
 <p>Here, we see similar regional trends play out, with a similar early
-fall divergence in the South compared to the other states. We could
-consider a situation in which people who have flu are more likely to get
-a secondary bacterial infection with streptococcus, or that the factors
-driving an increase in flu in the South are the same as the factors
-driving the increase in streptococcal pharyngitis. Will will consider
-flu cases in our statistical model of streptococcal pharyngitis
+fall divergence in the South compared to the other states. One notable
+difference is that the West region does not show a similar lack of
+disease burden; it follows a similar pattern as the Midwest and
+Northeast regions. This is important because it indicates that the
+regional trend observed for streptococcal pharyngitis cases is not
+entirely explained by factors such as selection bias, whereby the
+privately insured people in the West may be more likely to be wealthier
+and healthier because these states have a more robust public healthcare
+system, compared to states in the South with relatively limited public
+healthcare system, where a more representative fraction of the
+population may be covered by public health insurance.</p>
+<p>We could consider a situation in which people who have flu are more
+likely to get a secondary bacterial infection with streptococcus, or
+that the factors driving an increase in flu in the South are the same as
+the factors driving the increase in streptococcal pharyngitis. Will will
+consider flu cases in our statistical model of streptococcal pharyngitis
 cases.</p>
 <p>If flu drives cases of streptococcal pharyngitis, it would also be
 useful to look at how trends in flu vaccination map to cases of
@@ -332,27 +327,30 @@ like Florida.</p>
 collected through May, then restarts in July again. We can compare flu
 vaccination coverage to streptococcal pharyngitis cases in all ages vs
 in just the 5-9 age group, which is the highest prevalence age group, as
-seen above. While in general, the Northeast has high rates of
+seen previously. While in general, the Northeast has high rates of
 vaccination, and the other regions cluster pretty closely, there are a
 few examples of flu vaccination being lower in the South, particularly
 in the 2016-2017 and 2017-2018 flu seasons in all ages, although this
-does not seem to be the case in the 5-9 age group , where overall
+does not seem to be the case in the 5-9 age group, where overall
 vaccination rates are generally higher.</p>
-<p>There is some evidence that the PCV vaccinate (against
-<em>Streptococcus pneumoniae</em>) can prevent early cases of otitis
-media, infection of the middle ear that can be caused by pneumococcus or
-other pathogens [6][7]. We are also interested in whether vaccination
-with PCV is protective against streptococcal pharyngitis. Data on PCV
-vaccination were obtained from CDC ChildVaxView [8]. The CDC currently
-recommends that children receive 4 doses of either PCV13 or PCV15 at 2
-months, 4 months, 6 months, and 12-15 months old. Children who miss
-doses are recommended to follow catch-up guidelines to receive their
-vaccinations [9]. The CDC reports this vaccination data by birth cohort
-from 2011-2018. Here we use data on whether children received all 4 PCV
-vaccinations by the age of 35 months. We use the birth cohorts from
-2011, 2012, and 2013 to compare to flu and streptococcal pharyngitis
-cases occurring in 2016, 2017, and 2018 in those in the 5-9 age
-group.</p>
+<p>We are also interested in whether vaccination with PCV is protective
+against streptococcal pharyngitis.Prior research has shown that
+introduction of current PCV vaccines corresponded with a decline in
+overall cases of pharyngitis (including cases caused by pathogens other
+than Group A <em>Streptococcus</em>)[6]. There is also some evidence
+that the PCV vaccine (against <em>Streptococcus pneumoniae</em>) can
+prevent early cases of otitis media, infection of the middle ear that
+can be caused by pneumococcus or other pathogens [7][8].</p>
+<p>Data on PCV vaccination were obtained from CDC ChildVaxView [9]. The
+CDC currently recommends that children receive 4 doses of either PCV13
+or PCV15 at 2 months, 4 months, 6 months, and 12-15 months old. Children
+who miss doses are recommended to follow catch-up guidelines to receive
+their vaccinations [9]. The CDC reports this vaccination data by birth
+cohort from 2011-2018. Here we use data on whether children received all
+4 PCV vaccinations by the age of 35 months. We use the birth cohorts
+from 2011, 2012, and 2013 to compare to flu and streptococcal
+pharyngitis cases occurring in 2016, 2017, and 2018 in those in the 5-9
+age group.</p>
 <p><img src="Mapping_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
 <p>These data show generally high vaccination (&gt;75% universally),
 with some variation from year to year as to which states have the
@@ -362,8 +360,8 @@ birth cohort vaccination status for 5-9 year olds in the year 2016, 2011
 and 2012 for 5-9 year olds in 2017, and 2011, 2012, and 2013 for
 2018.</p>
 <p><img src="Mapping_files/figure-html/unnamed-chunk-11-1.png" width="960" />
-PCV coverage is pretty high across the regions in these years, and no
-clear trends jump out ofthis visualization. However, there are some
+PCV coverage is high across the regions in these years, and no clear
+trends jump out of this visualization. However, there are some
 variations from year to year in both cases and vaccination. For example,
 PCV vaccination appears to increase in the West over these 3 years, and
 cases of streptococcal pharyngitis go down.</p>
@@ -576,7 +574,7 @@ flu_by_month_regions_only &lt;- flu_by_month_regions_only |&gt; mutate(&quot;CI_
 flu_by_month_regions_only |&gt; ggplot(aes(x = MONTH, y = CI_per_thousand, group = part)) + 
   geom_line(aes(color = part)) + scale_y_continuous(trans = &quot;log10&quot;) +
   facet_wrap(~YEAR) + scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;,
-                                                                                                                                   &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ggtitle(&quot;Flu Cases Over Time \n All Ages&quot;) 
+                                                                                                                                   &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + theme_bw() +theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ggtitle(&quot;Flu Cases Over Time \n All Ages&quot;) +ylab(&quot;Cases per 1000 People&quot;) +  labs(color = &quot;Region&quot;)
 
 #need to figure out where data is missing 
 
@@ -620,9 +618,9 @@ us_base + geom_polygon(data = fluvax_map, aes(fill = as.numeric(`Estimate (%)`))
   panel.border = element_blank(),
   panel.grid = element_blank(),
   axis.title = element_blank()
-  ) + facet_wrap(~YEAR) + scale_fill_gradient(low = &quot;#FFFFFF&quot;, high = &quot;#F05E16&quot; ) + ggtitle(&quot;November Flu Vaccination Coverage&quot;)
+  ) + facet_wrap(~YEAR) + scale_fill_gradient(low = &quot;#FFFFFF&quot;, high = &quot;#F05E16&quot; ) + ggtitle(&quot;November Flu Vaccination Coverage&quot;) + labs(fill = &quot;Estimated Flu Vaccination %&quot;)
 
-fluvax_map$YEAR
+
 
 
 #now take &gt;6 months, which is vaccination in all ages. Do 5-12 separately
@@ -660,7 +658,9 @@ joint2_pivot &lt;- joint2|&gt; pivot_longer(cols = c(&quot;Strep_CI_per_ten_thou
 fluvax_strep_allages_plot &lt;- joint2_pivot |&gt; ggplot(aes(x= MONTH, y = value, color = part)) + 
   geom_line(aes(linetype = name)) + 
   facet_wrap(~YEAR) + scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;,
-                                                                                                                                   &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ggtitle(&quot;Strep Pharyngitis Rates and Flu Vaccination Over Time  \n All Ages, scaled to MarketScan maybe&quot;) + labs(linetype = &quot;Value Plotted&quot;) + labs(color = &quot;Region&quot;) + scale_linetype_discrete(labels = c(&quot;Flu Vaccination %&quot;, &quot;Strep cases per 10,000&quot;))
+                                                                                                                                   &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ggtitle(&quot;Strep Pharyngitis Rates and Flu Vaccination Over Time  \n All Ages, scaled to MarketScan maybe&quot;) + labs(linetype = &quot;Value Plotted&quot;) + labs(color = &quot;Region&quot;) + scale_linetype_discrete(labels = c(&quot;Flu Vaccination %&quot;, &quot;Strep cases per 10,000&quot;)) 
 
 
 #for 5-9 age group
@@ -681,11 +681,10 @@ joint3_pivot &lt;- joint3 |&gt; pivot_longer(cols = c(&quot;Strep_CI_per_two_tho
 fluvax_strep_59_plot &lt;- joint3_pivot |&gt; ggplot(aes(x= MONTH, y = value, color = part)) + 
   geom_line(aes(linetype = name)) + 
   facet_wrap(~YEAR) + scale_x_discrete(limits = c(&quot;JAN&quot;, &quot;FEB&quot;, &quot;MAR&quot;, &quot;APR&quot;, &quot;MAY&quot;, &quot;JUN&quot;, &quot;JUL&quot;, &quot;AUG&quot;, &quot;SEPT&quot;,
-                                                                                                                                   &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ggtitle(&quot;Strep Pharyngitis Rates and Flu Vaccination Over Time  \n 5-9 Age Group&quot;) + labs(linetype = &quot;Value Plotted&quot;) + labs(color = &quot;Region&quot;) + scale_linetype_discrete(labels = c(&quot;Flu Vaccination %&quot;, &quot;Strep cases per 2,000&quot;))
+                                                                                                                                   &quot;OCT&quot;, &quot;NOV&quot;, &quot;DEC&quot;)) +theme_bw() + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ggtitle(&quot;Strep Pharyngitis Rates and Flu Vaccination Over Time  \n 5-9 Age Group&quot;) + labs(linetype = &quot;Value Plotted&quot;) + labs(color = &quot;Region&quot;) + scale_linetype_discrete(labels = c(&quot;Flu Vaccination %&quot;, &quot;Strep cases per 2,000&quot;)) 
 
 fluvax_strep_allages_plot
 fluvax_strep_59_plot
-
 
 childvax_data &lt;- read_csv(&quot;/Users/madeleinekline/Dropbox (Harvard University)/G1/GradLab/vax_data/Vaccination_Coverage_among_Young_Children__0-35_Months_.csv&quot;)
 pcv_vax &lt;- childvax_data |&gt; filter(Vaccine == &quot;PCV&quot;)
@@ -750,13 +749,13 @@ strep_pcv_pivoted &lt;- pivot_longer(strep_pcv, cols = c(&quot;Strep_CI_per_five
 #   geom_line(aes(linetype = name)) + scale_x_discrete(limits = c(2016, 2017, 2018))
 
 #maybe separate by region, do barplots
-midwest &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;midwest&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#C21807&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases Midwest&quot;)
+midwest &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;midwest&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#C21807&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases Midwest&quot;) + theme_bw()
 
-northeast &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;northeast&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#658354&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases Northeast&quot;)
+northeast &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;northeast&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#658354&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases Northeast&quot;) + theme_bw()
 
-west &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;west&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#7852A9&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases West&quot;)
-
-south &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;south&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#6699CC&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases South&quot;)
+west &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;west&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#7852A9&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases West&quot;) + theme_bw()
+ 
+south &lt;- strep_pcv_pivoted |&gt; filter(part == &quot;south&quot;) |&gt; ggplot(aes(x = YEAR, y = value, fill = name)) + geom_bar(stat = &quot;identity&quot;, color = &quot;black&quot;, position = position_dodge()) + labs(fill = &quot;Value&quot;) + scale_fill_manual(values = c(&quot;#800000&quot;, &quot;#6699CC&quot; ), labels = c(&quot;PCV Vaccination %&quot;, &quot;Strep Cases per 500&quot;)) + ylim(0,100) + ggtitle(&quot;PCV Coverage and Strep Pharyngitis Cases South&quot;) + theme_bw()
 
 grid.arrange(midwest, northeast, west, south, ncol = 2, nrow =2)</code></pre>
 </div>
